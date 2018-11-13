@@ -100,6 +100,6 @@ head(data$survival,20)
 Regresión Cox:
 
 ```{r eval=F}
-modelo <- coxph(survival ~ congreso + Multipartidario + propEjecutivo,data=data)
+modelo <- coxph(survival ~ congresoRec + Multipartidario + propEjecutivo,data=data)
 summary(modelo)
 ```
