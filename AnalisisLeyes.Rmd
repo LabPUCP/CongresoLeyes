@@ -1,4 +1,4 @@
-##Análisis leyes del Congreso
+##An??lisis leyes del Congreso
 
 ```{r}
 library(stringr)
@@ -9,7 +9,7 @@ library(survival)
 
 ```{r}
 #Cargar data:
-data=read.csv("dfall.csv", stringsAsFactors = F)
+data=read.csv("dfall1.csv", stringsAsFactors = F)
 head(data)
 ```
 
@@ -36,12 +36,12 @@ data$congresoRec[data$congreso == names(table(data$congreso))[6]] = "2016-2021"
 
 ```{r}
 table(data$congresoRec)
-#Mayor número de leyes en el periodo 2001-2006
+#Mayor n??mero de leyes en el periodo 2001-2006
 ```
 
 ### Fecha presentacion 
 ```{r}
-#Fecha presentación: 
+#Fecha presentaci??n: 
 data$fechaPresentacion = str_trim(substr(data$fechaPresentacion,1,8))
 data$fechaPresentacion = as.POSIXct(data$fechaPresentacion,format="%d/%m/%y")
 ```
@@ -62,6 +62,11 @@ data$estadoFinalFecha = as.POSIXct(data$estadoFinalFecha,format="%d/%m/%y")
 #diferencia semanas entre inicio y fin 
 data$Semanas = difftime(data$estadoFinalFecha,data$fechaPresentacion, units="weeks")
 ```
+
+```{r}
+fail=(data[data$Semanas < 0,])
+```
+
 
 ```{r}
 #FILTRO. No incluir casos en los que la fecha fin sea anterior a la fecha incio (297 casos)
@@ -87,9 +92,9 @@ data$Multipartidario = ifelse(data$grupoParlamentario=="Multipartidario",1,0)
 data$propEjecutivo = as.factor(ifelse(grepl("Ejecutivo",data$proponente),1,0))
 ```
 
-###Análisis
+###An??lisis
 
-Creación del objeto survival:
+Creaci??n del objeto survival:
 
 ```{r eval=F}
 data$survival=with(data,Surv(Semanas, Publicado))
@@ -97,7 +102,7 @@ data$survival=with(data,Surv(Semanas, Publicado))
 head(data$survival,20)
 ```
 
-Regresión Cox:
+Regresi??n Cox:
 
 ```{r eval=F}
 modelo <- coxph(survival ~ congresoRec + Multipartidario + propEjecutivo,data=data)
