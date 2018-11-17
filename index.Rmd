@@ -1,0 +1,53 @@
+<img src="https://github.com/ERMPeru/elecciones2016/raw/master/headerLogo.png" width="1000">
+
+
+## Análisis de Promulgación de Leyes en el Congreso Peruano
+
+#### Elaborado por el [Laboratorio de Políticas Públicas de la PUCP](#team)
+
+-----
+
+Explicación del ejercicio.
+
+¿Por qué es relevante analizar el comportamiento de los grupos parlamentarios en la elaboración de leyes? 
+Objetivo del ejercicio.
+Periodo de analisis. 
+
+
+```{r include=FALSE}
+library(stringr)
+library(survival)
+```
+
+```{r include=FALSE}
+data=read.csv("dfall1.csv", stringsAsFactors = F)
+```
+
+```{r include=FALSE}
+data$congresoR[data$congreso == names(table(data$congreso))[1]] = "C1995_2000"
+data$congresoR[data$congreso == names(table(data$congreso))[2]] = "C2001_2006"
+data$congresoR[data$congreso == names(table(data$congreso))[3]] = "C2006_2011"
+data$congresoR[data$congreso == names(table(data$congreso))[4]] = "C2011_2016"
+data$congresoR[data$congreso == names(table(data$congreso))[5]] = "C2011_2016"
+data$congresoR[data$congreso == names(table(data$congreso))[6]] = "C2016_2021"
+```
+
+```{r include=FALSE}
+data[is.(data$estadoFinalFecha),]
+```
+
+------
+
+<a id='team'></a>
+
+**El equipo del LabPUCP está conformado por:**
+
+Director: Dr. José Manuel Magallanes.
+
+Investigadora Senior: 
+
+* Lic. María Gracia Becerra.
+
+Investigadores Junior: 
+
+* Alexander Benites.
