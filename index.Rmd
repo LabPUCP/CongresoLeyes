@@ -12,6 +12,9 @@
 library(stringr)
 library(survival)
 library(ggplot2)
+library(tidyverse)
+library(gridExtra)
+library(DT)
 ```
 
 ```{r include=FALSE}
@@ -108,9 +111,11 @@ data$GPOficialista=factor(ifelse(data$congresoR=="C1995_2000" &
 ```
 
 ```{r include=FALSE}
-#Estdao publicado 
-data$Publicado= factor(ifelse(grepl("Publicado", data$estadoFinal),1,0))
+#Estado promulgado
+data$Promulgado= factor(ifelse(grepl("Publicado", data$estadoFinal),1,
+                       ifelse(grepl("Promulgado", data$estadoFinal),1,0)))
 ```
+
 
 ```{r include=FALSE}
 #Fecha presentación:
@@ -119,23 +124,23 @@ data$fechaPresentacion = as.POSIXct(strptime(data$fechaPresentacion, format="%d/
 
 ```{r include=FALSE}
 #Fecha estado final:
-data$FechaPublicacion= ifelse(data$congresoR=="C1995_2000" & 
-                                 data$Publicado == "0","26/07/00",
-                          ifelse(data$congresoR=="C2001_2006" &  
-                                 data$Publicado == "0","26/07/06",
-                          ifelse(data$congresoR=="C2006_2011" &  
-                                 data$Publicado == "0","26/07/11",
-                          ifelse(data$congresoR=="C2011_2016" &  
-                                 data$Publicado == "0","26/07/16", 
-                          ifelse(data$congresoR=="C2016_2021" &  
-                                 data$Publicado == "0","12/11/18", data$estadoFinalFecha)))))
+data$FechaPromulgado = ifelse(data$congresoR=="C1995_2000" & 
+                                 data$Promulgado == "0","26/07/00",
+                          ifelse(data$congresoR =="C2001_2006" &  
+                                 data$Promulgado == "0","26/07/06",
+                          ifelse(data$congresoR =="C2006_2011" &  
+                                 data$Promulgado == "0","26/07/11",
+                          ifelse(data$congresoR =="C2011_2016" &  
+                                 data$Promulgado == "0","26/07/16", 
+                          ifelse(data$congresoR =="C2016_2021" &  
+                                 data$Promulgado == "0","12/11/18", data$estadoFinalFecha)))))
 
-data$FechaPublicacion=as.POSIXct(strptime(data$FechaPublicacion, format="%d/%m/%y"))
+data$FechaPromulgado=as.POSIXct(strptime(data$FechaPromulgado, format="%d/%m/%y"))
 ```
 
 ```{r include=FALSE}
 #Tiempo publicacion
-data$TiempoPublicacion=difftime(data$FechaPublicacion,data$fechaPresentacion, units = "weeks")
+data$TiempoPublicacion=difftime(data$FechaPromulgado,data$fechaPresentacion, units = "weeks")
 ```
 
 __Índice __
@@ -152,6 +157,47 @@ __Índice __
 <a id='Intro'></a> 
 
 El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**
+
+```{r include=FALSE}
+leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
+```
+
+```{r fig.height = 3.5, echo=FALSE,warning=FALSE}
+ggplot(data=leyesCongreso, aes(x=congresoR, y=leyes)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Propuestas de ley por legislatura", y="Numero total", x="Legislatura", caption="Promedio de propuestas de ley por legislatura: 6 917") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = mean(leyesCongreso$leyes) ,linetype="dashed", color="red")  + geom_text(aes(label=leyes), vjust=1.6, color="white", size=3) 
+```
+
+###  Análisis periodo 1995-2000
+
+<a id='P1995'></a> 
+
+En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el periodo de legislatura 1995-2000. 
+
+#### Proponentes
+
+La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% group_by(proponenteR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+```
+
+
+
+
+
+
+
+
 
 ------
 
