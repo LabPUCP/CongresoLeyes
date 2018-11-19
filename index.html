@@ -130,33 +130,27 @@ $(document).ready(function () {
 <div id="elaborado-por-el-laboratorio-de-politicas-publicas-de-la-pucp" class="section level4">
 <h4>Elaborado por el <a href="#team">Laboratorio de Políticas Públicas de la PUCP</a></h4>
 <hr />
-<p>Explicación del ejercicio.</p>
-<p>¿Por qué es relevante analizar el comportamiento de los grupos parlamentarios en la elaboración de leyes? Objetivo del ejercicio. Periodo de analisis.</p>
-<pre class="r"><code>library(stringr)
-library(survival)</code></pre>
-<p>Cargar data:</p>
-<pre class="r"><code>data=read.csv(&quot;dfall1.csv&quot;, stringsAsFactors = F)</code></pre>
-<pre class="r"><code>data$congresoR[data$congreso == names(table(data$congreso))[1]] = &quot;C1995_2000&quot;
-data$congresoR[data$congreso == names(table(data$congreso))[2]] = &quot;C2001_2006&quot;
-data$congresoR[data$congreso == names(table(data$congreso))[3]] = &quot;C2006_2011&quot;
-data$congresoR[data$congreso == names(table(data$congreso))[4]] = &quot;C2011_2016&quot;
-data$congresoR[data$congreso == names(table(data$congreso))[5]] = &quot;C2011_2016&quot;
-data$congresoR[data$congreso == names(table(data$congreso))[6]] = &quot;C2016_2021&quot;</code></pre>
-<pre class="r"><code>data[is.(data$estadoFinalFecha),]</code></pre>
+<p><strong>Índice </strong></p>
+<ul>
+<li><a href="#Intro">Introducción</a></li>
+<li><a href="#P1995">Análisis periodo 1995-2000</a></li>
+<li><a href="#P2001">Análisis periodo 2001-2006</a></li>
+<li><a href="#P2006">Análisis periodo 2006-2011</a></li>
+<li><a href="#P2011">Análisis periodo 2011-2016</a></li>
+<li><a href="#P2016">Análisis periodo 2016-2021</a></li>
+</ul>
 </div>
-<div id="grupo-politico-organizacion-con-la-que-entran-al-congreso" class="section level3">
-<h3>Grupo Politico: Organización con la que entran al Congreso</h3>
+<div id="introduccion" class="section level4">
+<h4>Introducción</h4>
+<p><a id="Intro"></a></p>
+<p>El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron <strong>34 587 propuestas de ley.</strong></p>
 <hr />
 <p><a id="team"></a></p>
 <p><strong>El equipo del LabPUCP está conformado por:</strong></p>
-<p>Director: Dr. José Manuel Magallanes.</p>
-<p>Investigadora Senior:</p>
 <ul>
-<li>Lic. María Gracia Becerra.</li>
-</ul>
-<p>Investigadores Junior:</p>
-<ul>
-<li>Alexander Benites.</li>
+<li><p>Director: Dr. José Manuel Magallanes</p></li>
+<li><p>Investigadora Senior: Lic. María Gracia Becerra</p></li>
+<li><p>Investigador Junior: Alexander Benites</p></li>
 </ul>
 </div>
 </div>

@@ -7,23 +7,25 @@
 
 -----
 
-Explicación del ejercicio.
-
-¿Por qué es relevante analizar el comportamiento de los grupos parlamentarios en la elaboración de leyes? 
-Objetivo del ejercicio.
-Periodo de analisis. 
-
-
 ```{r include=FALSE}
+##Paquetes a instalar
 library(stringr)
 library(survival)
+library(ggplot2)
 ```
 
 ```{r include=FALSE}
+#cargar data
 data=read.csv("dfall1.csv", stringsAsFactors = F)
 ```
 
 ```{r include=FALSE}
+data=data[-1] #Elimino partido politico, ya tenemos grupo partidario 
+names(data)
+```
+
+```{r include=FALSE}
+#periodo Congreso
 data$congresoR[data$congreso == names(table(data$congreso))[1]] = "C1995_2000"
 data$congresoR[data$congreso == names(table(data$congreso))[2]] = "C2001_2006"
 data$congresoR[data$congreso == names(table(data$congreso))[3]] = "C2006_2011"
@@ -33,8 +35,123 @@ data$congresoR[data$congreso == names(table(data$congreso))[6]] = "C2016_2021"
 ```
 
 ```{r include=FALSE}
-data[is.(data$estadoFinalFecha),]
+#Proponente
+data$proponenteR[data$proponente == names(table(data$proponente))[1]] = NA
+data$proponenteR[data$proponente == names(table(data$proponente))[2]] = "BCR"
+data$proponenteR[data$proponente == names(table(data$proponente))[3]] = "BCR"
+data$proponenteR[data$proponente == names(table(data$proponente))[4]] = "Colegios Profesionales"
+data$proponenteR[data$proponente == names(table(data$proponente))[5]] = "Colegios Profesionales"
+data$proponenteR[data$proponente == names(table(data$proponente))[6]] = "CNM"
+data$proponenteR[data$proponente == names(table(data$proponente))[7]] = "Gobiernos Regionales"
+data$proponenteR[data$proponente == names(table(data$proponente))[8]] = "Contraloria"
+data$proponenteR[data$proponente == names(table(data$proponente))[9]] = "Poder Judicial"
+data$proponenteR[data$proponente == names(table(data$proponente))[10]] = "Colegios Profesionales"
+data$proponenteR[data$proponente == names(table(data$proponente))[11]] = "Congreso"
+data$proponenteR[data$proponente == names(table(data$proponente))[12]] = "CNM"
+data$proponenteR[data$proponente == names(table(data$proponente))[13]] = "Contraloria"
+data$proponenteR[data$proponente == names(table(data$proponente))[14]] = "Poder Judicial"
+data$proponenteR[data$proponente == names(table(data$proponente))[15]] = "Defensoria"
+data$proponenteR[data$proponente == names(table(data$proponente))[16]] = "Defensoria"
+data$proponenteR[data$proponente == names(table(data$proponente))[17]] = "Fiscalia"
+data$proponenteR[data$proponente == names(table(data$proponente))[18]] = "Gobiernos Locales"
+data$proponenteR[data$proponente == names(table(data$proponente))[19]] = "Gobiernos Regionales"
+data$proponenteR[data$proponente == names(table(data$proponente))[20]] = "Iniciativas Ciudadanas"
+data$proponenteR[data$proponente == names(table(data$proponente))[21]] = "JNE"
+data$proponenteR[data$proponente == names(table(data$proponente))[22]] = "JNE"
+data$proponenteR[data$proponente == names(table(data$proponente))[23]] = "Gobiernos Locales"
+data$proponenteR[data$proponente == names(table(data$proponente))[24]] = "Ministerio Publico"
+data$proponenteR[data$proponente == names(table(data$proponente))[25]] = "Gobiernos Locales"
+data$proponenteR[data$proponente == names(table(data$proponente))[26]] = "ONPE"
+data$proponenteR[data$proponente == names(table(data$proponente))[27]] = "ONPE"
+data$proponenteR[data$proponente == names(table(data$proponente))[28]] = "Poder Ejecutivo"
+data$proponenteR[data$proponente == names(table(data$proponente))[29]] = "Poder Ejecutivo"
+data$proponenteR[data$proponente == names(table(data$proponente))[30]] = "Poder Ejecutivo"
+data$proponenteR[data$proponente == names(table(data$proponente))[31]] = "Poder Ejecutivo"
+data$proponenteR[data$proponente == names(table(data$proponente))[32]] = "RENIEC"
+data$proponenteR[data$proponente == names(table(data$proponente))[33]] = "RENIEC"
+data$proponenteR[data$proponente == names(table(data$proponente))[34]] = "SBS"
+data$proponenteR[data$proponente == names(table(data$proponente))[35]] = "TC"
+data$proponenteR[data$proponente == names(table(data$proponente))[36]] = "TC"
 ```
+
+```{r include=FALSE}
+#Poder Ejecutivo
+data$ProponeEjecutivo = factor(ifelse(data$proponenteR=="Poder Ejecutivo",1,0))
+```
+
+```{r include=FALSE}
+#Grupo Parlamentario 
+data$grupoParlamentarioR=data$grupoParlamentario
+
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[3]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[9]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[11]] = "Comision Especial"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[25]] = "Partido Aprista Peruano"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[26]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[27]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[29]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[33]] = "Multipartidario"
+```
+
+```{r include=FALSE}
+#Partido oficialista
+data$GPOficialista=factor(ifelse(data$congresoR=="C1995_2000" & 
+                                 data$grupoParlamentarioR == "Grupo Fujimorista",1,
+                          ifelse(data$congresoR=="C2001_2006" &  
+                                 data$grupoParlamentarioR == "Peru Posible",1,
+                          ifelse(data$congresoR=="C2006_2011" &  
+                                 data$grupoParlamentarioR == "Partido Aprista Peruano",1,
+                          ifelse(data$congresoR=="C2011_2016" &  
+                                 data$grupoParlamentarioR == "Grupo Parlamentario Nacionalista",1, 
+                          ifelse(data$congresoR=="C2016_2021" &  
+                                 data$grupoParlamentarioR == "Peruanos por el Kambio",1,0))))))
+```
+
+```{r include=FALSE}
+#Estdao publicado 
+data$Publicado= factor(ifelse(grepl("Publicado", data$estadoFinal),1,0))
+```
+
+```{r include=FALSE}
+#Fecha presentación:
+data$fechaPresentacion = as.POSIXct(strptime(data$fechaPresentacion, format="%d/%m/%y"))
+```
+
+```{r include=FALSE}
+#Fecha estado final:
+data$FechaPublicacion= ifelse(data$congresoR=="C1995_2000" & 
+                                 data$Publicado == "0","26/07/00",
+                          ifelse(data$congresoR=="C2001_2006" &  
+                                 data$Publicado == "0","26/07/06",
+                          ifelse(data$congresoR=="C2006_2011" &  
+                                 data$Publicado == "0","26/07/11",
+                          ifelse(data$congresoR=="C2011_2016" &  
+                                 data$Publicado == "0","26/07/16", 
+                          ifelse(data$congresoR=="C2016_2021" &  
+                                 data$Publicado == "0","12/11/18", data$estadoFinalFecha)))))
+
+data$FechaPublicacion=as.POSIXct(strptime(data$FechaPublicacion, format="%d/%m/%y"))
+```
+
+```{r include=FALSE}
+#Tiempo publicacion
+data$TiempoPublicacion=difftime(data$FechaPublicacion,data$fechaPresentacion, units = "weeks")
+```
+
+__Índice __
+
+  * [Introducción](#Intro)
+  * [Análisis periodo 1995-2000](#P1995)
+  * [Análisis periodo 2001-2006](#P2001)
+  * [Análisis periodo 2006-2011](#P2006)
+  * [Análisis periodo 2011-2016](#P2011) 
+  * [Análisis periodo 2016-2021](#P2016)
+    
+#### Introducción
+
+<a id='Intro'></a> 
+
+El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**
 
 ------
 
@@ -42,12 +159,8 @@ data[is.(data$estadoFinalFecha),]
 
 **El equipo del LabPUCP está conformado por:**
 
-Director: Dr. José Manuel Magallanes.
+- Director: Dr. José Manuel Magallanes
 
-Investigadora Senior: 
+- Investigadora Senior: Lic. María Gracia Becerra
 
-* Lic. María Gracia Becerra.
-
-Investigadores Junior: 
-
-* Alexander Benites.
+- Investigador Junior: Alexander Benites
