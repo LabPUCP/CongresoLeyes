@@ -15,6 +15,14 @@ library(ggplot2)
 library(tidyverse)
 library(gridExtra)
 library(DT)
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
+library(ggpubr)
+```
+
+```{r include=FALSE}
+seMean = function(x) sd(x)/sqrt(length(x))
 ```
 
 ```{r include=FALSE}
@@ -140,7 +148,7 @@ data$FechaPromulgado=as.POSIXct(strptime(data$FechaPromulgado, format="%d/%m/%y"
 
 ```{r include=FALSE}
 #Tiempo publicacion
-data$TiempoPublicacion=difftime(data$FechaPromulgado,data$fechaPresentacion, units = "weeks")
+data$TiempoP=difftime(data$FechaPromulgado,data$fechaPresentacion, units = "weeks")
 ```
 
 __Índice __
@@ -172,7 +180,7 @@ ggplot(data=leyesCongreso, aes(x=congresoR, y=leyes)) +
 
 <a id='P1995'></a> 
 
-En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el periodo de legislatura 1995-2000. 
+En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el periodo legislativo 1995-2000. 
 
 #### Proponentes
 
@@ -191,7 +199,185 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
+El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
 
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:14)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por proponente (1995-2000)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% 
+  group_by(proponenteR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+
+```{r fig.height = 4, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (1995-2000)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 23.4 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = mean(meanTiempo$Tiempo) ,linetype="dashed", color="red")
+
+```
+
+#### Grupos parlamentarios 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+```
+
+El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:6)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por grupo parlamentario (1995-2000)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el análisis].
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% 
+  group_by(grupoParlamentarioR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+```{r fig.height = 4, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (1995-2000)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 23.4 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = mean(meanTiempo$Tiempo) ,linetype="dashed", color="red")
+
+```
+
+#### Análisis del contenido de Leyes Propuestas
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d=d[c(1:20),]
+d=d[order(-d$freq),]
+d$orden=c(1:20)
+```
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C1995_2000" & Promulgado=="0") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d2 <- data.frame(word = names(v),freq=v)
+d2=d2[c(1:20),]
+d2=d2[order(-d2$freq),]
+d2$orden=c(1:20)
+```
+
+```{r fig.height = 4.5, echo=FALSE,warning=FALSE}
+m1= ggplot(d, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip()
+
+m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
+
+ggarrange(m1,m2, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+<a id='P2001'></a> 
+
+###  Análisis periodo 2001-2006
+
+#### Proponentes
+
+#### Grupos parlamentarios
+
+#### Análisis del contenido de Leyes Propuestas
+
+#### Determinantes de la promulgación de leyes
 
 
 
@@ -200,6 +386,8 @@ datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 
 
 ------
+
+
 
 <a id='team'></a>
 
