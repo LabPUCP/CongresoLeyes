@@ -1,9 +1,9 @@
 <img src="https://github.com/ERMPeru/elecciones2016/raw/master/headerLogo.png" width="1000">
 
 
-## An??lisis de Promulgaci??n de Leyes en el Congreso Peruano
+## Análisis de Promulgación de Leyes en el Congreso Peruano
 
-#### Elaborado por el [Laboratorio de Pol??ticas P??blicas de la PUCP](#team)
+#### Elaborado por el [Laboratorio de Políticas Públicas de la PUCP](#team)
 
 -----
 
@@ -151,20 +151,20 @@ data$FechaPromulgado=as.POSIXct(strptime(data$FechaPromulgado, format="%d/%m/%y"
 data$TiempoP=difftime(data$FechaPromulgado,data$fechaPresentacion, units = "weeks")
 ```
 
-__??ndice __
+__Índice __
 
-  * [Introducci??n](#Intro)
-  * [An??lisis periodo 1995-2000](#P1995)
-  * [An??lisis periodo 2001-2006](#P2001)
-  * [An??lisis periodo 2006-2011](#P2006)
-  * [An??lisis periodo 2011-2016](#P2011) 
-  * [An??lisis periodo 2016-2021](#P2016)
+  * [Introducción](#Intro)
+  * [Análisis periodo 1995-2000](#P1995)
+  * [Análisis periodo 2001-2006](#P2001)
+  * [Análisis periodo 2006-2011](#P2006)
+  * [Análisis periodo 2011-2016](#P2011) 
+  * [Análisis periodo 2016-2021](#P2016)
     
-#### Introducci??n
+#### Introducción
 
 <a id='Intro'></a> 
 
-El siguiente ejercicio eval??a la promulgaci??n de leyes de los ??ltimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**
+El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**
 
 ```{r include=FALSE}
 leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
@@ -176,15 +176,15 @@ ggplot(data=leyesCongreso, aes(x=congresoR, y=leyes)) +
     	    theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = mean(leyesCongreso$leyes) ,linetype="dashed", color="red")  + geom_text(aes(label=leyes), vjust=1.6, color="white", size=3) 
 ```
 
-###  An??lisis periodo 1995-2000
+###  Análisis periodo 1995-2000
 
 <a id='P1995'></a> 
 
-En la siguiente secci??n, se analizan las **5 807 leyes propuestas** durante el periodo legislativo 1995-2000. 
+En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el periodo legislativo 1995-2000. 
 
 #### Proponentes
 
-La siguiente tabla muestra el n??mero de leyes propuestas por tipo de proponente y el n??mero de leyes promulgadas por tipo de proponente. 
+La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -199,7 +199,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por tipo de proponente. 
+El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -221,7 +221,7 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -256,7 +256,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por grupo parlamentario.
+El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -278,7 +278,7 @@ ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje,
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -365,15 +365,15 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
 ggarrange(m1,m2, ncol = 2, nrow = 1)
 ```
 
-#### Determinantes de la promulgaci??n de leyes 
+#### Determinantes de la promulgación de leyes 
 
 <a id='P2001'></a> 
 
-###  An??lisis periodo 2001-2006
+###  Análisis periodo 2001-2006
 
 #### Proponentes
 
-La siguiente tabla muestra el n??mero de leyes propuestas por tipo de proponente y el n??mero de leyes promulgadas por tipo de proponente. 
+La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2001_2006") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -388,7 +388,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por tipo de proponente. 
+El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -410,7 +410,7 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -445,7 +445,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por grupo parlamentario.
+El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -467,7 +467,7 @@ ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje,
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -486,7 +486,7 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 ```
 
-#### An??lisis del contenido de Leyes Propuestas
+#### Análisis del contenido de Leyes Propuestas
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1") %>% select(sumilla)
@@ -557,11 +557,11 @@ ggarrange(m1,m2, ncol = 2, nrow = 1)
 
 <a id='P2006'></a> 
 
-###  An??lisis periodo 2006-2011
+###  Análisis periodo 2006-2011
 
 #### Proponentes
 
-La siguiente tabla muestra el n??mero de leyes propuestas por tipo de proponente y el n??mero de leyes promulgadas por tipo de proponente. 
+La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2006_2011") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -576,7 +576,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por tipo de proponente. 
+El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -598,7 +598,7 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el an??lisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -633,7 +633,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por grupo parlamentario.
+El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -655,7 +655,7 @@ ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje,
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el an??lisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -745,11 +745,11 @@ ggarrange(m1,m2, ncol = 2, nrow = 1)
 
 <a id='P2011'></a> 
 
-###  An??lisis periodo 2011-2016
+###  Análisis periodo 2011-2016
 
 #### Proponentes
 
-La siguiente tabla muestra el n??mero de leyes propuestas por tipo de proponente y el n??mero de leyes promulgadas por tipo de proponente. 
+La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2011_2016") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -764,7 +764,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por tipo de proponente. 
+El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -786,7 +786,7 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -821,7 +821,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por grupo parlamentario.
+El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -843,7 +843,7 @@ ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje,
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -862,7 +862,7 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 ```
 
-#### An??lisis del contenido de Leyes Propuestas
+#### Análisis del contenido de Leyes Propuestas
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1") %>% select(sumilla)
@@ -932,11 +932,11 @@ ggarrange(m1,m2, ncol = 2, nrow = 1)
 
 <a id='P2016'></a> 
 
-###  An??lisis periodo 2016-2021
+###  Análisis periodo 2016-2021
 
 #### Proponentes
 
-La siguiente tabla muestra el n??mero de leyes propuestas por tipo de proponente y el n??mero de leyes promulgadas por tipo de proponente. 
+La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2016_2021") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -951,7 +951,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por tipo de proponente. 
+El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -973,7 +973,7 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -1008,7 +1008,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gr??fico muestra el estado de las leyes propuestas por grupo parlamentario.
+El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -1030,7 +1030,7 @@ ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje,
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gr??fico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran ??nicamente a las leyes promulgadas para el an??lisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el análisis].
 
 ```{r include=FALSE}
 #Promedios: 
@@ -1049,7 +1049,7 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 ```
 
-#### An??lisis del contenido de Leyes Propuestas
+#### Análisis del contenido de Leyes Propuestas
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1") %>% select(sumilla)
@@ -1119,9 +1119,6 @@ ggarrange(m1,m2, ncol = 2, nrow = 1)
 
 
 ------
-
-
-
 
 <a id='team'></a>
 
