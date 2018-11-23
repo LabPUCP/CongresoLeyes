@@ -164,7 +164,7 @@ __Índice __
 
 <a id='Intro'></a> 
 
-El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**
+El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.** Por su parte, en los 5 periodos analizados, el valor promedio de propuestas de ley es de **6 917 proyectos**, de los cual
 
 ```{r include=FALSE}
 leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
@@ -367,6 +367,62 @@ ggarrange(m1,m2, ncol = 2, nrow = 1)
 
 #### Determinantes de la promulgación de leyes 
 
+Regresión survival (Periodo 1995 - 2000):
+
+```{r}
+ModeloCongreso=data[data$congresoR=='C1995_2000',]
+```
+
+```{r}
+ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
+```
+
+```{r}
+library(survival)
+ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r}
+modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
+summary(modelo1)
+
+```
+
+Impacto del grupo oficialista en la probabilidad de publicación del proyecto de ley:
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (1995 - 2000)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
+
+Impacto del Poder Ejecutivo como proponente en la probabilidad de publicación del proyecto de ley:
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (1995 - 2000)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
+
 <a id='P2001'></a> 
 
 ###  Análisis periodo 2001-2006
@@ -552,6 +608,61 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
     	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
 
 ggarrange(m1,m2, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+Regresión survival (Periodo 2001 - 2006):
+
+```{r}
+ModeloCongreso=data[data$congresoR=='C2001_2006',]
+```
+
+```{r}
+ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
+```
+
+```{r}
+library(survival)
+ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r}
+modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
+summary(modelo1)
+
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2001 - 2006)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2001 - 2006)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
 ```
 
 
@@ -742,6 +853,60 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
 ggarrange(m1,m2, ncol = 2, nrow = 1)
 ```
 
+#### Determinantes de la promulgación de leyes 
+
+Regresión survival (Periodo 2006 - 2011):
+
+```{r}
+ModeloCongreso=data[data$congresoR=='C2006_2011',]
+```
+
+```{r}
+ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
+```
+
+```{r}
+library(survival)
+ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r}
+modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
+summary(modelo1)
+
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2006 - 2011)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2006 - 2011)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
 
 <a id='P2011'></a> 
 
@@ -928,6 +1093,61 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
     	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
 
 ggarrange(m1,m2, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+Regresión survival (Periodo 2011 - 2016):
+
+```{r}
+ModeloCongreso=data[data$congresoR=='C2011_2016',]
+```
+
+```{r}
+ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
+```
+
+```{r}
+library(survival)
+ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r}
+modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
+summary(modelo1)
+
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2011 - 2016)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2011 - 2016)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
 ```
 
 <a id='P2016'></a> 
@@ -1117,7 +1337,59 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
 ggarrange(m1,m2, ncol = 2, nrow = 1)
 ```
 
+#### Determinantes de la promulgación de leyes 
 
+Regresión survival (Periodo 2016 - 2021):
+
+```{r}
+ModeloCongreso=data[data$congresoR=='C2016_2021',]
+```
+
+```{r}
+ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
+```
+
+```{r}
+library(survival)
+ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r}
+modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
+summary(modelo1)
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2011 - 2016)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
+
+###
+ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
+ejeY='Probabilidad de que el proyecto sea publicado'
+titulo="Curva de Sobrevivencia (2011 - 2016)"
+autoplot(KM.fondos,
+         xlab=ejeX,
+         ylab=ejeY, 
+         main = titulo,
+         conf.int = F)
+```
 ------
 
 <a id='team'></a>
