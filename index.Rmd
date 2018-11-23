@@ -164,7 +164,7 @@ __Índice __
 
 <a id='Intro'></a> 
 
-El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.** Por su parte, en los 5 periodos analizados, el valor promedio de propuestas de ley es de **6 917 proyectos**, de los cual
+El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.** El valor promedio de propuestas de ley emitidas es de **6 917 proyectos** en los 5 periodos. De todos ellos, el periodo parlamentario entre los años 2001 y 2006 muestra una marcada diferencia con respecto a los cuatro restantes, con **14 841 proyectos de ley**, dato que se encuentra por encima del valor promedio.
 
 ```{r include=FALSE}
 leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
@@ -1367,7 +1367,7 @@ KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
 ###
 ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
 ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (2011 - 2016)"
+titulo="Curva de Sobrevivencia (2016 - 2021)"
 autoplot(KM.fondos,
          xlab=ejeX,
          ylab=ejeY, 
@@ -1383,12 +1383,13 @@ KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
 ###
 ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
 ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (2011 - 2016)"
+titulo="Curva de Sobrevivencia (2016 - 2021)"
 autoplot(KM.fondos,
          xlab=ejeX,
          ylab=ejeY, 
          main = titulo,
          conf.int = F)
+
 ```
 ------
 
