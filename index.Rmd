@@ -184,7 +184,7 @@ En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el 
 
 #### Proponentes
 
-La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
+La siguiente tabla muestra el número de leyes propuestas y el número de leyes promulgadas por tipo de proponente. En total, son **14 tipos de proponentes distintos**, de los cuales el Congreso, el Poder Ejecutivo y los Gobiernos Locales son los que denotan un mayor un número de propuestas de ley, así como de leyes promulgadas. Sin embargo, de ese conjunto, el Congreso muestra una marcada diferencia. Entre los años 1995 y 2000, este último emitió **5 231** propuestas de ley, de las cuales **1 133** fueron emitidas.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -199,7 +199,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
+El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. De los 14 proponentes, los unicos cuyas propuestas de ley llegan a ser promulgadas en una proporción equivalente al 50% del total o más, son la Defensoría del Pueblo, el Poder Ejecutivo, el Consejo Nacional de la Magistratura y el Tribunal Constitucional. Sin embargo, como se observó en la tabla anterior, entre el año 1995 y el año 2000, la cantidad de propuestas de ley emitidas por muchos de ellos es bastante escasa.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -221,7 +221,7 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. En este análisis, se tomaron en cuenta únicamente las leyes promulgadas. Así, el tiempo promedio para la promulgación de una ley, entre el años 1995 y el año 2000, es de, aproximadamente, 23 semanas. Del total de proponentes, son 7 los que muestran valores menores para la promulgación de leyes en comparación al valor promedio. Estos son: el Tribunal Constitucional, el Poder Judicial, el Poder Ejecutivo, la Oficina Nacional de Procesos Electorales, la Fiscalía de la Nación y el Consejo Nacional de la Magistratura.
 
 ```{r include=FALSE}
 #Promedios: 
@@ -256,7 +256,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
+El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario. En este ejercicio, hubo una gran cantidad de leyes propuestas que no contaban con ningún grupo parlamentario. De aquellas que sí mostraron la presencia de alguno, fue el Grupo Fujimorista el que registró la mayor cantidad de leyes propuestas, de las cuales el 92.1% fueron promulgadas entre el año 1995 y el año 2000.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -278,7 +278,7 @@ ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje,
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el análisis].
+El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario. Al igual que en el ejercicio anterior, se consideraron únicamente a las leyes promulgadas en el análisis. Del total de grupos parlamentarios, los úncios cuyas leyes propuestas fueron aprobadas en un tiempo menor al valor promedio de promulación de leyes fueron el Grupo Fujimoristas y los congresistas no agrupados.
 
 ```{r include=FALSE}
 #Promedios: 
@@ -297,7 +297,9 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 ```
 
-#### An??lisis del contenido de Leyes Propuestas
+#### Análisis del contenido de Leyes Propuestas
+
+Este análisis tuvo la finalidad de conocer los temas priorizados en las leyes propuestas y promulgadas entre el año 1995 y el año 2000. Para ello, se realizó un contéo de las palabras que fueron mencionadas con mayor frecuencia en los documentos en cuestión. Para la realización de este ejercicio, fueron eliminadas las palabras que proveen de poca o nula información sobre los temas abordados por las leyes propuestas y promulgadas. Los resultados del análisis arrojan que las palabras mencionadas con mayor frecuencia en las leyes no promulgadas fueron "impuesto","constitución" y "penal". Por su parte, las palabras que aparecen con mayor frecuencia en las leyes promulgadas fueron "impuesto", "ventas" y ministerio.
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% select(sumilla)
