@@ -243,6 +243,8 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
+
+
 En promedio, en el periodo legislativo 1995-2000, **una ley tardó seis meses en ser promulgada** (26 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
 
 - Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 2 meses en ser promulgada (9 semanas). 
@@ -393,7 +395,7 @@ stargazer(modelo1, type = "text",
 
 #### Proponentes
 
-La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
+En el periodo legislativo 2001-2006, se encontraron 15 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2001_2006") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -408,7 +410,11 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
+En el periodo legislativo 2001-2006, **el 33% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 78% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- En el caso del Congreso, este promulgó el 31% de las leyes que propuso durante el periodo de estudio.
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 23% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. Sin embargo, esta cifra aumenta en 15 puntos porcentuales, con respecto al periodo de estudio anterior.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -430,7 +436,11 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
+En promedio, en el periodo legislativo 2001-2006, **una ley tardó XX meses en ser promulgada** (XX semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Ejecutivo se encuentran por XX del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 4.6 meses en ser promulgada (20 semanas). 
+- Las leyes del Congreso se encuentran por XX del promedio. Una ley propuesta por el Congreso tarda, en promedio, 12.4 meses en ser promulgada (53 semanas). 
+- Las Leyes del Gobierno Local se encuentran por XX del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 10 meses en ser promulgada (43 semanas). 
 
 ```{r include=FALSE}
 #Promedios: 
@@ -451,6 +461,8 @@ ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) +
 ```
 
 #### Grupos parlamentarios 
+
+En el periodo 2001-2006, hubieron 13 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 5 752 leyes**. De las leyes que cuentan con información, el Grupo Fujimorista registra la mayor cantidad de leyes propuestas.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2001_2006") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
