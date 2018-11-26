@@ -19,6 +19,7 @@ library(tm)
 library(wordcloud)
 library(RColorBrewer)
 library(ggpubr)
+library(stargazer)
 ```
 
 ```{r include=FALSE}
@@ -164,7 +165,9 @@ __Índice __
 
 <a id='Intro'></a> 
 
-El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.** El valor promedio de propuestas de ley emitidas es de **6 917 proyectos** en los 5 periodos. De todos ellos, el periodo parlamentario entre los años 2001 y 2006 muestra una marcada diferencia con respecto a los cuatro restantes, con **14 841 proyectos de ley**, dato que se encuentra por encima del valor promedio.
+El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.** El énfasis se encuentra en el análisis de los tiempos necesarios para promulgar una ley.  
+
+El siguiente gráfico muestra el total de leyes analizadas por periodo de gobierno. Como se observa, el periodo 2001-2006 muestra una marcada diferencia en la producción de leyes con respecto a los otros periodos parlamentarios, encontrandose por encima del promedio.
 
 ```{r include=FALSE}
 leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
@@ -184,7 +187,7 @@ En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el 
 
 #### Proponentes
 
-La siguiente tabla muestra el número de leyes propuestas y el número de leyes promulgadas por tipo de proponente. En total, son **14 tipos de proponentes distintos**, de los cuales el Congreso, el Poder Ejecutivo y los Gobiernos Locales son los que denotan un mayor un número de propuestas de ley, así como de leyes promulgadas. Sin embargo, de ese conjunto, el Congreso muestra una marcada diferencia. Entre los años 1995 y 2000, este último emitió **5 231** propuestas de ley, de las cuales **1 133** fueron emitidas.
+Una ley puede ser propuesta por distintas instituciones o actores de la sociedad civil. En el periodo legislativo 1995-2000, se encontraron 14 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -196,10 +199,14 @@ proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
 proponentes=proponentes[order(-proponentes$N_Leyes),]
 proponentes=proponentes[complete.cases(proponentes),]
 
-datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. De los 14 proponentes, los unicos cuyas propuestas de ley llegan a ser promulgadas en una proporción equivalente al 50% del total o más, son la Defensoría del Pueblo, el Poder Ejecutivo, el Consejo Nacional de la Magistratura y el Tribunal Constitucional. Sin embargo, como se observó en la tabla anterior, entre el año 1995 y el año 2000, la cantidad de propuestas de ley emitidas por muchos de ellos es bastante escasa.
+En el periodo legislativo 1995-2000, **el 26% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 79% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- El Congreso promulgó la cuarta parte de las leyes que propuso. El 22% de las leyes propuestas por el Congreso fueron promulgadas. 
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 8% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -221,7 +228,11 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. En este análisis, se tomaron en cuenta únicamente las leyes promulgadas. Así, el tiempo promedio para la promulgación de una ley, entre el años 1995 y el año 2000, es de, aproximadamente, 23 semanas. Del total de proponentes, son 7 los que muestran valores menores para la promulgación de leyes en comparación al valor promedio. Estos son: el Tribunal Constitucional, el Poder Judicial, el Poder Ejecutivo, la Oficina Nacional de Procesos Electorales, la Fiscalía de la Nación y el Consejo Nacional de la Magistratura.
+En promedio, en el periodo legislativo 1995-2000, **una ley tardó seis meses en ser promulgada** (26 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 2 meses en ser promulgada (9 semanas). 
+- Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 7 meses en ser promulgada (31 semanas). 
+- Las Leyes del Gobierno Local se encuentran por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 9 meses en ser promulgada (38 semanas). 
 
 ```{r include=FALSE}
 #Promedios: 
@@ -237,11 +248,13 @@ meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
 ```{r fig.height = 4, echo=FALSE,warning=FALSE}
 ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
     geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
-    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (1995-2000)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 23.4 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = mean(meanTiempo$Tiempo) ,linetype="dashed", color="red")
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (1995-2000)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 23.4 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 26.17168 ,linetype="dashed", color="red")
 
 ```
 
 #### Grupos parlamentarios 
+
+En el periodo 1995-2000, hubieron 13 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 5 752 leyes**. De las leyes que cuentan con información, el Grupo Fujimorista registra la mayor cantidad de leyes propuestas. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
@@ -256,50 +269,15 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario. En este ejercicio, hubo una gran cantidad de leyes propuestas que no contaban con ningún grupo parlamentario. De aquellas que sí mostraron la presencia de alguno, fue el Grupo Fujimorista el que registró la mayor cantidad de leyes propuestas, de las cuales el 92.1% fueron promulgadas entre el año 1995 y el año 2000.
-
-```{r include=FALSE}
-proponentes = proponentes  %>% 
-         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
-                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
-                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
-
-proponentes$orden=c(1:6)
-
-proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
-
-proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
-```
-
-```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
-ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje, fill = Estado)) + 
-  geom_bar(stat = "identity") + coord_flip() +
-  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por grupo parlamentario (1995-2000)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
-    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
-```
-
-El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario. Al igual que en el ejercicio anterior, se consideraron únicamente a las leyes promulgadas en el análisis. Del total de grupos parlamentarios, los úncios cuyas leyes propuestas fueron aprobadas en un tiempo menor al valor promedio de promulación de leyes fueron el Grupo Fujimoristas y los congresistas no agrupados.
-
-```{r include=FALSE}
-#Promedios: 
-meanTiempo = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% 
-  group_by(grupoParlamentarioR) %>% 
-  summarise(Leyes = n(),
-            Tiempo = mean(as.numeric(TiempoP)), 
-            seTiempo = seMean(as.numeric(TiempoP)))
-meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
-```
-
-```{r fig.height = 4, echo=FALSE,warning=FALSE}
-ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) + 
-    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
-    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (1995-2000)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 23.4 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = mean(meanTiempo$Tiempo) ,linetype="dashed", color="red")
-
-```
+En tanto no se cuenta con información para la mayoría de leyes, no se continuará con el análisis de grupos parlamentarios. 
 
 #### Análisis del contenido de Leyes Propuestas
 
-Este análisis tuvo la finalidad de conocer los temas priorizados en las leyes propuestas y promulgadas entre el año 1995 y el año 2000. Para ello, se realizó un contéo de las palabras que fueron mencionadas con mayor frecuencia en los documentos en cuestión. Para la realización de este ejercicio, fueron eliminadas las palabras que proveen de poca o nula información sobre los temas abordados por las leyes propuestas y promulgadas. Los resultados del análisis arrojan que las palabras mencionadas con mayor frecuencia en las leyes no promulgadas fueron "impuesto","constitución" y "penal". Por su parte, las palabras que aparecen con mayor frecuencia en las leyes promulgadas fueron "impuesto", "ventas" y ministerio.
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 1995-2000. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+
+- La palabra **impuesto** fue la más repetida, tanto en leyes promulgadas como no promulgadas. 
+- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: derechos, servicios y regiones. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: ventas, promoción y empresas. 
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% select(sumilla)
@@ -364,65 +342,29 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
   geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
     	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
 
-ggarrange(m1,m2, ncol = 2, nrow = 1)
+ggarrange(m2,m1, ncol = 2, nrow = 1)
 ```
 
 #### Determinantes de la promulgación de leyes 
 
-Regresión survival (Periodo 1995 - 2000):
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 1995-2000, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
 
-```{r}
+```{r include=FALSE}
 ModeloCongreso=data[data$congresoR=='C1995_2000',]
 ```
 
-```{r}
+```{r include=FALSE}
 ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
 ```
 
-```{r}
+```{r include=FALSE}
 library(survival)
 ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
 ```
 
-```{r}
+```{r, echo=FALSE}
 modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
-summary(modelo1)
-
-```
-
-Impacto del grupo oficialista en la probabilidad de publicación del proyecto de ley:
-```{r}
-library(ggplot2)
-library(ggfortify)
-KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
-
-###
-ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
-ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (1995 - 2000)"
-autoplot(KM.fondos,
-         xlab=ejeX,
-         ylab=ejeY, 
-         main = titulo,
-         conf.int = F)
-```
-
-Impacto del Poder Ejecutivo como proponente en la probabilidad de publicación del proyecto de ley:
-
-```{r}
-library(ggplot2)
-library(ggfortify)
-KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
-
-###
-ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
-ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (1995 - 2000)"
-autoplot(KM.fondos,
-         xlab=ejeX,
-         ylab=ejeY, 
-         main = titulo,
-         conf.int = F)
+stargazer(modelo1, type = "text", font.size = "small")
 ```
 
 <a id='P2001'></a> 
