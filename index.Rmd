@@ -7,6 +7,10 @@
 
 -----
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
 ```{r include=FALSE}
 ##Paquetes a instalar
 library(stringr)
@@ -363,8 +367,11 @@ ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)
 ```
 
 ```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo")
 modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
-stargazer(modelo1, type = "text", font.size = "small")
+stargazer::stargazer(modelo1, type = "text", font.size = "small", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.", no.space=T, column.sep.width = "0pt", header=F)
 ```
 
 <a id='P2001'></a> 
