@@ -7,10 +7,6 @@
 
 -----
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
 ```{r include=FALSE}
 ##Paquetes a instalar
 library(stringr)
@@ -156,6 +152,21 @@ data$FechaPromulgado=as.POSIXct(strptime(data$FechaPromulgado, format="%d/%m/%y"
 data$TiempoP=difftime(data$FechaPromulgado,data$fechaPresentacion, units = "weeks")
 ```
 
+```{r}
+data$sumilla=tolower(data$sumilla)
+
+#Impuestos
+data$Impuestos = factor(ifelse(grepl("impuesto", data$sumilla),1,0))
+
+#Lima
+data$Lima = factor(ifelse(grepl("lima", data$sumilla),1,0))
+```
+
+
+```{r}
+table(data$Impuestos)
+```
+
 __Índice __
 
   * [Introducción](#Intro)
@@ -261,7 +272,7 @@ ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) +
 En el periodo 1995-2000, hubieron 13 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 5 752 leyes**. De las leyes que cuentan con información, el Grupo Fujimorista registra la mayor cantidad de leyes propuestas. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+proponentes1 = data %>% filter(congresoR=="C1995_2000" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
 
 proponentes2 = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
 
@@ -353,30 +364,32 @@ ggarrange(m2,m1, ncol = 2, nrow = 1)
 
 En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 1995-2000, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
 
-```{r include=FALSE}
-ModeloCongreso=data[data$congresoR=='C1995_2000',]
-```
+- Que una ley sea propuesta por el grupo parlamentario oficialista, incrementa la probabilidad de que la ley sea promulgada en 6.1%.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 8.9%.
+- Que una ley se refiera a impuestos, incrementa la probabilidad de que la ley sea promulgada en 2.0%. 
 
 ```{r include=FALSE}
-ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
+ModeloCongreso1=data[data$congresoR=='C1995_2000',]
 ```
 
 ```{r include=FALSE}
 library(survival)
-ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
 ```
 
 ```{r, echo=FALSE}
-etiquetas=c("Grupo Oficialista", "Propone Ejecutivo")
-modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
-stargazer::stargazer(modelo1, type = "text", font.size = "small", 
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Impuestos")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Impuestos,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
           apply.coef = exp,
-          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.", no.space=T, column.sep.width = "0pt", header=F)
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
 ```
 
 <a id='P2001'></a> 
 
 ###  Análisis periodo 2001-2006
+
+
 
 #### Proponentes
 
