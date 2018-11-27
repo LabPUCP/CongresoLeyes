@@ -183,8 +183,6 @@ __Índice __
 
 El presente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**  
 
-A continuación, se muestra el total de leyes analizadas por periodo de gobierno. Como se observa, el periodo 2001-2006 muestra una marcada diferencia en la producción de leyes con respecto a los otros periodos parlamentarios, encontrandose por encima del promedio en producción de leyes.
-
 ```{r include=FALSE}
 leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
 ```
