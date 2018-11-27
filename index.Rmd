@@ -163,6 +163,9 @@ data$Penal = factor(ifelse(grepl("penal", data$sumilla),1,0))
 
 #Sistema:
 data$Sistema = factor(ifelse(grepl("sistema", data$sumilla),1,0))
+
+#Provincia:
+data$Provincia = factor(ifelse(grepl("provincia", data$sumilla),1,0))
 ```
 
 __Índice __
@@ -598,7 +601,7 @@ ggarrange(m2,m1, ncol = 2, nrow = 1)
 
 #### Determinantes de la promulgación de leyes 
 
-En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 1995-2000, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2001-2006, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
 
 - Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
 - Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 5.7%.
@@ -1006,6 +1009,12 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 #### Análisis del contenido de Leyes Propuestas
 
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2011-2016. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+
+- Las palabras **penal** y **sistema** fueron las más repetida en las leyes no promulgadas y promulgadas. 
+- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: provincia, sistema y salud. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: penal, provincia y territorio.
+
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1") %>% select(sumilla)
 modi<-Corpus(VectorSource(dataText$sumilla))
@@ -1069,71 +1078,44 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
   geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
     	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
 
-ggarrange(m1,m2, ncol = 2, nrow = 1)
+ggarrange(m2,m1, ncol = 2, nrow = 1)
 ```
 
 #### Determinantes de la promulgación de leyes 
 
-Regresión survival (Periodo 2011 - 2016):
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2011-2016, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
 
-```{r}
-ModeloCongreso=data[data$congresoR=='C2011_2016',]
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 7.7%.
+- Que una ley se refiera a sistema o penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+
+
+```{r include=FALSE}
+ModeloCongreso1=data[data$congresoR=='C2011_2016',]
 ```
 
-```{r}
-ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
-```
-
-```{r}
+```{r include=FALSE}
 library(survival)
-ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
 ```
 
-```{r}
-modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
-summary(modelo1)
-
-```
-
-```{r}
-library(ggplot2)
-library(ggfortify)
-KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
-
-###
-ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
-ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (2011 - 2016)"
-autoplot(KM.fondos,
-         xlab=ejeX,
-         ylab=ejeY, 
-         main = titulo,
-         conf.int = F)
-```
-
-```{r}
-library(ggplot2)
-library(ggfortify)
-KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
-
-###
-ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
-ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (2011 - 2016)"
-autoplot(KM.fondos,
-         xlab=ejeX,
-         ylab=ejeY, 
-         main = titulo,
-         conf.int = F)
+```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
 ```
 
 <a id='P2016'></a> 
 
 ###  Análisis periodo 2016-2021
 
+En la siguiente sección, se analizan las **3 607 leyes propuestas** durante el periodo legislativo 2011-2016.
+
 #### Proponentes
 
-La siguiente tabla muestra el número de leyes propuestas por tipo de proponente y el número de leyes promulgadas por tipo de proponente. 
+En el periodo legislativo 2011-2016, se encontraron 13 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2016_2021") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -1148,7 +1130,11 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gráfico muestra el estado de las leyes propuestas por tipo de proponente. 
+En el periodo legislativo 2016-2021, **el 19% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 48% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- En el caso del Congreso, este promulgó el 16% de las leyes que propuso durante el periodo de estudio.
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 10.7% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -1170,7 +1156,11 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por tipo de proponente [Se consideran únicamente a las leyes promulgadas para el análisis].
+En promedio, en el periodo legislativo 2016-2021, **una ley tardó 7 meses en ser promulgada** (32 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 5 meses en ser promulgada (19 semanas). 
+- Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 8 meses en ser promulgada (35 semanas). 
+- Las Leyes del Gobierno Local se encuentran por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 12 meses en ser promulgada (54 semanas). 
 
 ```{r include=FALSE}
 #Promedios: 
@@ -1186,11 +1176,13 @@ meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
 ```{r fig.height = 4, echo=FALSE,warning=FALSE}
 ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
     geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
-    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (2016-2021)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 46.1 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = mean(meanTiempo$Tiempo) ,linetype="dashed", color="red")
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (2016-2021)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 32 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 31.82399 ,linetype="dashed", color="red")
 
 ```
 
 #### Grupos parlamentarios 
+
+En el periodo 2016-2021, hubieron 6 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. De las leyes que cuentan con información, el Grupo Parlamentario Fujimorista registra la mayor cantidad de leyes propuestas, seguido por el Frente Amplio por Justicia, Vida y Libertad y Alianza para el Progreso. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 463 leyes**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2016_2021") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
@@ -1205,7 +1197,11 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-El siguiente gráfico muestra el estado de las leyes propuestas por grupo parlamentario.
+En el siguiente gráfico se muestra el estado de las leyes propuestas por grupo parlamentario.
+
+- En el caso del Grupo Parlamentario Fujimorista, este promulgó el 19% de las leyes que propuesto durante el periodo de estudio. 
+- En el caso del Frente Amplio, este promulgó el 13% de las leyes que propuso durante el periodo de estudio.
+- Finalmente, en el caso de Alianza para el Progreso, este grupo parlamentario promulgó el 15% de las leyes que propuso durante el periodo de estudio.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -1227,11 +1223,15 @@ ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje,
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada por grupo parlamentario [Se consideran únicamente a las leyes promulgadas para el análisis].
+En promedio, en el periodo legislativo 2016-2021, **una ley tardó 8 meses en ser promulgada** (35 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del grupo parlamentario. 
+
+- Las leyes del Grupo Parlamentario Fujimorista se encuentran por debajo del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 8 meses en ser promulgada (33 semanas). 
+- Las leyes propuestas por el Frente Amplio se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 13 meses en ser promulgada (55 semanas). 
+- Las Leyes de Alianza para el Progreso, por su parte, también se encuentran levemente por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 8 meses en ser promulgada (37 semanas).
 
 ```{r include=FALSE}
 #Promedios: 
-meanTiempo = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1") %>% 
+meanTiempo = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1" & proponenteR == "Congreso") %>% 
   group_by(grupoParlamentarioR) %>% 
   summarise(Leyes = n(),
             Tiempo = mean(as.numeric(TiempoP)), 
@@ -1242,11 +1242,17 @@ meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
 ```{r fig.height = 6, echo=FALSE,warning=FALSE}
 ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) + 
     geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
-    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (2016-2021)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 32 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = mean(meanTiempo$Tiempo) ,linetype="dashed", color="red")
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (2016-2021)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 35 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 34.64286 ,linetype="dashed", color="red")
 
 ```
 
 #### Análisis del contenido de Leyes Propuestas
+
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2016-2021. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+
+- La palabra **provincia** fue la más repetira en las leyes no promulgadas, mientras que la palabra **penal** fue la más repetida en las leyes promulgadas. 
+- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: departamento, creación y distrito. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: constitución, provincia y departamento.
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1") %>% select(sumilla)
@@ -1311,71 +1317,43 @@ m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
   geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
     	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
 
-ggarrange(m1,m2, ncol = 2, nrow = 1)
+ggarrange(m2,m1, ncol = 2, nrow = 1)
 ```
 
 #### Determinantes de la promulgación de leyes 
 
-Regresión survival (Periodo 2016 - 2021):
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2016-2021, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
 
-```{r}
-ModeloCongreso=data[data$congresoR=='C2016_2021',]
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 5%.
+- Que una ley se refiera a provincia o penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+
+
+```{r include=FALSE}
+ModeloCongreso1=data[data$congresoR=='C2016_2021',]
 ```
 
-```{r}
-ModeloCongreso = ModeloCongreso[,c(19,21,22,24)]
-```
-
-```{r}
+```{r include=FALSE}
 library(survival)
-ModeloCongreso$survival=with(ModeloCongreso,Surv(TiempoP, as.numeric(Promulgado)))
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
 ```
 
-```{r}
-modelo1 <- coxph(survival ~ GPOficialista + ProponeEjecutivo,data=ModeloCongreso)
-summary(modelo1)
+```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
 ```
 
-```{r}
-library(ggplot2)
-library(ggfortify)
-KM.fondos = survfit(survival ~ GPOficialista, data = ModeloCongreso)
-
-###
-ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
-ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (2016 - 2021)"
-autoplot(KM.fondos,
-         xlab=ejeX,
-         ylab=ejeY, 
-         main = titulo,
-         conf.int = F)
-```
-
-```{r}
-library(ggplot2)
-library(ggfortify)
-KM.fondos = survfit(survival ~ ProponeEjecutivo, data = ModeloCongreso)
-
-###
-ejeX='TIEMPO HASTA QUE SE PUBLICA EL PROYECTO\n curva cae cuando el proyecto es publicado'
-ejeY='Probabilidad de que el proyecto sea publicado'
-titulo="Curva de Sobrevivencia (2016 - 2021)"
-autoplot(KM.fondos,
-         xlab=ejeX,
-         ylab=ejeY, 
-         main = titulo,
-         conf.int = F)
-
-```
 ------
 
 <a id='team'></a>
 
-**El equipo del LabPUCP est?? conformado por:**
+**El equipo del LabPUCP está conformado por:**
 
-- Director: Dr. Jos?? Manuel Magallanes
+- Director: Dr. José Manuel Magallanes
 
-- Investigadora Senior: Lic. Mar??a Gracia Becerra
+- Investigadora Senior: Lic. María Gracia Becerra
 
 - Investigador Junior: Alexander Benites
