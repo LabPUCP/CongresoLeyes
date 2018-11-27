@@ -181,9 +181,9 @@ __Índice __
 
 <a id='Intro'></a> 
 
-El siguiente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.** El énfasis se encuentra en el análisis de los tiempos necesarios para promulgar una ley.  
+El presente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**  
 
-El siguiente gráfico muestra el total de leyes analizadas por periodo de gobierno. Como se observa, el periodo 2001-2006 muestra una marcada diferencia en la producción de leyes con respecto a los otros periodos parlamentarios, encontrandose por encima del promedio.
+A continuación, se muestra el total de leyes analizadas por periodo de gobierno. Como se observa, el periodo 2001-2006 muestra una marcada diferencia en la producción de leyes con respecto a los otros periodos parlamentarios, encontrandose por encima del promedio en producción de leyes.
 
 ```{r include=FALSE}
 leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
@@ -203,7 +203,7 @@ En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el 
 
 #### Proponentes
 
-Una ley puede ser propuesta por distintas instituciones o actores de la sociedad civil. En el periodo legislativo 1995-2000, se encontraron **14 proponentes distintos.** A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio. 
+Una ley puede ser propuesta por distintas instituciones o actores de la sociedad civil. En el periodo legislativo 1995-2000, se encontraron **14 proponentes distintos.** A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas en el periodo de estudio. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -218,7 +218,7 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
 ```
 
-En el periodo legislativo 1995-2000, **el 26% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+En el periodo legislativo 1995-2000, **el 26% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgadas en el periodo de estudio, en función del tipo de proponente. 
 
 - El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 79% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
 - El Congreso promulgó la cuarta parte de las leyes que propuso. El 22% de las leyes propuestas por el Congreso fueron promulgadas. 
@@ -244,9 +244,9 @@ ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = 
     	    theme(panel.background=element_rect(fill = "white", colour = "black"))
 ```
 
-En promedio, en el periodo legislativo 1995-2000, **una ley tardó seis meses en ser promulgada** (26 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+En promedio, en el periodo legislativo 1995-2000, **una ley tardó seis meses en ser promulgada (26 semanas)**. El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
 
-- Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 2 meses en ser promulgada (9 semanas). 
+- Las leyes del Poder Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 2 meses en ser promulgada (9 semanas). 
 - Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 7 meses en ser promulgada (31 semanas). 
 - Las Leyes del Gobierno Local se encuentran por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 9 meses en ser promulgada (38 semanas). 
 
@@ -270,7 +270,7 @@ ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) +
 
 #### Grupos parlamentarios 
 
-En el periodo 1995-2000, hubieron 13 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 5 752 leyes**. De las leyes que cuentan con información, el Grupo Fujimorista registra la mayor cantidad de leyes propuestas. 
+Las leyes del Congreso son propuestas por distintos grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 5 752 leyes**. De las leyes que cuentan con información, el Grupo Fujimorista registra la mayor cantidad de leyes propuestas. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C1995_2000" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
@@ -289,7 +289,7 @@ En tanto no se cuenta con información para la mayoría de leyes, no se continua
 
 #### Análisis del contenido de Leyes Propuestas
 
-En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 1995-2000. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 1995-2000. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes propuestas en el periodo de estudio. 
 
 - La palabra **impuesto** fue la más repetida, tanto en leyes promulgadas como no promulgadas. 
 - En el grupo de leyes no promulgadas, destaca palabras relacionadas a: derechos, servicios y regiones. 
@@ -394,7 +394,7 @@ En la siguiente sección, se analizan las **14 839 leyes propuestas** durante el
 
 #### Proponentes
 
-En el periodo legislativo 2001-2006, se encontraron 15 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+En el periodo legislativo 2001-2006, se encontraron 15 proponentes distintos. A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2001_2006") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -413,7 +413,7 @@ En el periodo legislativo 2001-2006, **el 33% de leyes propuestas fueron promulg
 
 - El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 78% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
 - En el caso del Congreso, este promulgó el 31% de las leyes que propuso durante el periodo de estudio.
-- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 23% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. Sin embargo, esta cifra aumenta con respecto al periodo de estudio anterior.
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 23% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. Sin embargo, esta cifra aumenta con respecto al periodo legislativo anterior.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -461,10 +461,10 @@ ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) +
 
 #### Grupos parlamentarios 
 
-En el periodo 2001-2006, hubieron 11 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. De las leyes que cuentan con información, Perú Posible registra la mayor cantidad de leyes propuestas, seguido por Unidad Nacional y el Partido Aprista Peruano.
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. Perú Posible registra la mayor cantidad de leyes propuestas, seguido por Unidad Nacional y el Partido Aprista Peruano.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-proponentes1 = data %>% filter(congresoR=="C2001_2006") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+proponentes1 = data %>% filter(congresoR=="C2001_2006" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
 
 proponentes2 = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
 
@@ -473,14 +473,14 @@ proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
 proponentes=proponentes[order(-proponentes$N_Leyes),]
 proponentes=proponentes[complete.cases(proponentes),]
 
-datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
 ```
 
-En el siguiente gráfico se muestra el estado de las leyes propuestas por grupo parlamentario.
+En el siguiente gráfico se muestra el estado de las leyes propuestas, en función del grupo parlamentario.
 
 - Peru Posible muestra el mayor porcentaje de leyes promulgadas. El 32% de las leyes propuestas por este grupo parlamentario fueron promulgadas. 
-- En el caso de Unidad Nacional, este promulgó el 30% de las leyes que propuso durante el periodo de estudio.
-- El Partido Aprista Peruano, por su parte, también promulgó el 30% de las leyes que propuso durante el periodo de estudio.
+- Unidad Nacional promulgó el 30% de las leyes que propuso.
+- El Partido Aprista Peruano, por su parte, también promulgó el 30% de las leyes que propuso.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -488,7 +488,7 @@ proponentes = proponentes  %>%
                 Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
                 NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
 
-proponentes$orden=c(1:6)
+proponentes$orden=c(1:11)
 
 proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
 
@@ -527,11 +527,11 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 #### Análisis del contenido de Leyes Propuestas
 
-En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2001-2006. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2001-2006.  Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
 
 - La palabra **penal** fue la más repetida, tanto en leyes promulgadas como no promulgadas. 
-- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: constitución, civil y política. 
-- En el grupo de leyes promulgadas, destacan palabras relacionadas a: congreso, sistema e impuesto.
+- En el grupo de leyes no promulgadas, destacan palabras relacionadas a: constitución, civil y política. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: congreso, creación e impuestos.
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1") %>% select(sumilla)
@@ -601,12 +601,12 @@ ggarrange(m2,m1, ncol = 2, nrow = 1)
 
 #### Determinantes de la promulgación de leyes 
 
-En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2001-2006, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2001-2006, mediante el uso de una **regresión de Cox**. La regresión de Cox.
 
-- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada.
 - Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 5.7%.
-- Que una ley se refiera a penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
-
+- Que una ley se refiera a penal no incrementa la probabilidad de que una ley sea promulgada.
+- Que una ley se refiera a impuestos no incrementa la probabilidad de que una ley sea promulgada.
 
 ```{r include=FALSE}
 ModeloCongreso1=data[data$congresoR=='C2001_2006',]
@@ -618,8 +618,8 @@ ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Pro
 ```
 
 ```{r, echo=FALSE}
-etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal")
-modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal,data=ModeloCongreso1)
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal", "Impuestos")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal + Impuestos,data=ModeloCongreso1)
 stargazer(modelo1, type = "text", 
           apply.coef = exp,
           apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
@@ -634,7 +634,7 @@ En la siguiente sección, se analizan las **4 908 leyes propuestas** durante el 
 
 #### Proponentes
 
-En el periodo legislativo 2006-2011, se encontraron 16 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+En el periodo legislativo 2006-2011, se encontraron 16 proponentes distintos. A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2006_2011") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -646,13 +646,13 @@ proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
 proponentes=proponentes[order(-proponentes$N_Leyes),]
 proponentes=proponentes[complete.cases(proponentes),]
 
-datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
 ```
 
-En el periodo legislativo 2006-2011, **el 28% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+En el periodo legislativo 2006-2011, **el 28% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgadas en el periodo de estudio, en función del proponente. 
 
-- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 57% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
-- En el caso del Congreso se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Este promulgó el 22% de las leyes que propuso durante el periodo de estudio.
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 57% de las leyes propuestas por el Ejecutivo fueron promulgadas. Ello muestra una dismunición en comparación con periodos legislativos anteriores.
+- El Congreso se encuentra entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 22% de las leyes propuestas por el Congreso fueron promulgadas.
 - Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 23% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
 
 ```{r include=FALSE}
@@ -679,7 +679,7 @@ En promedio, en el periodo legislativo 2006-2011, **una ley tardó 11 meses en s
 
 - Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 5 meses en ser promulgada (23 semanas). 
 - Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 14 meses en ser promulgada (60 semanas). 
-- Las Leyes del Gobierno Local se encuentran levemente por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 11 meses en ser promulgada (47 semanas). 
+- Las Leyes del Gobierno Local se encuentran cerca del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 11 meses en ser promulgada (47 semanas). 
 
 ```{r include=FALSE}
 #Promedios: 
@@ -701,27 +701,26 @@ ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) +
 
 #### Grupos parlamentarios 
 
-En el periodo 2006-2011, hubieron 7 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. De las leyes que cuentan con información, el Grupo Parlamentario Nacionalista registra la mayor cantidad de leyes propuestas, seguido por el Partido Aprista Peruano y Unidad Nacional. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 1 221 leyes**
-
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. El Grupo Parlamentario Nacionalista registra la mayor cantidad de leyes propuestas, seguido por el Partido Aprista Peruano y Unidad Nacional. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-proponentes1 = data %>% filter(congresoR=="C2006_2011") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+proponentes1 = data %>% filter(congresoR=="C2006_2011" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
 
-proponentes2 = data %>% filter(congresoR=="C2006_2011" & Promulgado=="1") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+proponentes2 = data %>% filter(congresoR=="C2006_2011" & Promulgado=="1" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
 
 proponentes= left_join(proponentes1, proponentes2)
 proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
 proponentes=proponentes[order(-proponentes$N_Leyes),]
 proponentes=proponentes[complete.cases(proponentes),]
 
-datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
 ```
 
-En el siguiente gráfico se muestra el estado de las leyes propuestas por grupo parlamentario.
+En el siguiente gráfico se muestra el estado de las leyes propuestas, por grupo parlamentario.
 
-- En el caso del Grupo Parlamentario Nacionalsita, este promulgó el 19% de las leyes que propuesto durante el periodo de estudio. 
-- En el caso del Partido Aprista Peruano, este promulgó el 26% de las leyes que propuso durante el periodo de estudio.
-- Finalmente, Unidad Nacional también promulgó el 26% de las leyes que propuso durante el periodo de estudio.
+- El Grupo Parlamentario Nacionalista, promulgó el 19% de las leyes que propuso.
+- El Partido Aprista Peruano, promulgó el 26% de las leyes que propuso.
+- Unidad Nacional también promulgó el 26% de las leyes que propuso.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -768,10 +767,10 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 #### Análisis del contenido de Leyes Propuestas
 
-En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2006-2011. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2006-2011. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
 
-- La palabra **sistema** fue la más repetida en las leyes no promulgadas, mientras que la palabra **penal** fue las más repetida, tanto en leyes promulgadas como no promulgadas. 
-- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: constitución, consejo y servicios. 
+- La palabra **penal** fue una de las más repetidas, tanto en leyes promulgadas como no promulgadas. 
+- En el grupo de leyes no promulgadas, destacan palabras relacionadas a: constitución, servicios y salud. 
 - En el grupo de leyes promulgadas, destacan palabras relacionadas a: sector, provincia y fiscal.
 
 ```{r include=FALSE}
@@ -842,11 +841,11 @@ ggarrange(m2,m1, ncol = 2, nrow = 1)
 
 #### Determinantes de la promulgación de leyes 
 
-En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2006-2011, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2006-2011, mediante el uso de una **regresión de Cox**.
 
-- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada.
 - Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 4.3%.
-- Que una ley se refiera a sistema o penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+- Que una ley se refiera a penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
 
 
 ```{r include=FALSE}
@@ -859,14 +858,12 @@ ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Pro
 ```
 
 ```{r, echo=FALSE}
-etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Sistema")
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal")
 modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal,data=ModeloCongreso1)
 stargazer(modelo1, type = "text", 
           apply.coef = exp,
           apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
 ```
-
-
 
 <a id='P2011'></a> 
 
@@ -876,7 +873,7 @@ En la siguiente sección, se analizan las **5 424 leyes propuestas** durante el 
 
 #### Proponentes
 
-En el periodo legislativo 2011-2016, se encontraron 16 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+En el periodo legislativo 2011-2016, se encontraron 16 proponentes distintos. A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2011_2016") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -893,8 +890,8 @@ datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 
 En el periodo legislativo 2011-2016, **el 28% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
 
-- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 77.4% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
-- En el caso del Congreso se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Este promulgó el 22% de las leyes que propuso durante el periodo de estudio.
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 77% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- El Congreso se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. El 22% de las leyes que propuso el Ejecutivo fueron promulgadas.
 - Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 17% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
 
 ```{r include=FALSE}
@@ -943,12 +940,12 @@ ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) +
 
 #### Grupos parlamentarios 
 
-En el periodo 2011-2016, hubieron 6 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. De las leyes que cuentan con información, el Grupo Parlamentario Nacionalista registra la mayor cantidad de leyes propuestas, seguido por el Grupo Fujimorista y Solidaridad Nacional. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 769 leyes**
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. El Grupo Parlamentario Nacionalista registra la mayor cantidad de leyes propuestas, seguido por el Grupo Fujimorista y Solidaridad Nacional. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-proponentes1 = data %>% filter(congresoR=="C2011_2016") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+proponentes1 = data %>% filter(congresoR=="C2011_2016" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
 
-proponentes2 = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+proponentes2 = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
 
 proponentes= left_join(proponentes1, proponentes2)
 proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
@@ -960,9 +957,9 @@ datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 
 En el siguiente gráfico se muestra el estado de las leyes propuestas por grupo parlamentario.
 
-- En el caso del Grupo Parlamentario Nacionalsita, este promulgó el 22% de las leyes que propuesto durante el periodo de estudio. 
-- En el caso del Grupo Fujimorista, este promulgó el 24% de las leyes que propuso durante el periodo de estudio.
-- Finalmente, en el caso de Solidaridad Nacional, este grupo parlamentario promulgó el 22% de las leyes que propuso durante el periodo de estudio.
+- El Grupo Parlamentario Nacionalista promulgó el 22% de las leyes que propuso.
+- En Grupo Fujimorista promulgó el 24% de las leyes que propuso.
+- Solidaridad Nacional promulgó el 22% de las leyes que propuso.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -970,7 +967,7 @@ proponentes = proponentes  %>%
                 Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
                 NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
 
-proponentes$orden=c(1:16)
+proponentes$orden=c(1:15)
 
 proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
 
@@ -1009,11 +1006,11 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 #### Análisis del contenido de Leyes Propuestas
 
-En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2011-2016. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2011-2016. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
 
-- Las palabras **penal** y **sistema** fueron las más repetida en las leyes no promulgadas y promulgadas. 
-- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: provincia, sistema y salud. 
-- En el grupo de leyes promulgadas, destacan palabras relacionadas a: penal, provincia y territorio.
+- La palabra **penal** fue una de las más repetidas, tanto en leyes promulgadas como no promulgadas. 
+- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: regiones, desarrollo y salud.
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: regiones, territorio y ejecución.
 
 ```{r include=FALSE}
 dataText = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1") %>% select(sumilla)
@@ -1083,12 +1080,11 @@ ggarrange(m2,m1, ncol = 2, nrow = 1)
 
 #### Determinantes de la promulgación de leyes 
 
-En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2011-2016, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2011-2016, mediante el uso de una **regresión de Cox**.
 
 - Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
 - Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 7.7%.
-- Que una ley se refiera a sistema o penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
-
+- Que una ley se refiera a penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
 
 ```{r include=FALSE}
 ModeloCongreso1=data[data$congresoR=='C2011_2016',]
@@ -1111,11 +1107,11 @@ stargazer(modelo1, type = "text",
 
 ###  Análisis periodo 2016-2021
 
-En la siguiente sección, se analizan las **3 607 leyes propuestas** durante el periodo legislativo 2011-2016.
+En la siguiente sección, se analizan las **3 607 leyes propuestas** durante el periodo legislativo 2016-2021.
 
 #### Proponentes
 
-En el periodo legislativo 2011-2016, se encontraron 13 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+En el periodo legislativo 2016-2021, se encontraron 13 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 proponentes1 = data %>% filter(congresoR=="C2016_2021") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
@@ -1130,11 +1126,11 @@ proponentes=proponentes[complete.cases(proponentes),]
 datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
 ```
 
-En el periodo legislativo 2016-2021, **el 19% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+Hasta el momento, **el 19% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
 
 - El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 48% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
 - En el caso del Congreso, este promulgó el 16% de las leyes que propuso durante el periodo de estudio.
-- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 10.7% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 11% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -1182,26 +1178,26 @@ ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) +
 
 #### Grupos parlamentarios 
 
-En el periodo 2016-2021, hubieron 6 grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso según grupo parlamentario. De las leyes que cuentan con información, el Grupo Parlamentario Fujimorista registra la mayor cantidad de leyes propuestas, seguido por el Frente Amplio por Justicia, Vida y Libertad y Alianza para el Progreso. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 463 leyes**
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. El Grupo Parlamentario Fujimorista registra la mayor cantidad de leyes propuestas, seguido por el Frente Amplio y Alianza para el Progreso. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-proponentes1 = data %>% filter(congresoR=="C2016_2021") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+proponentes1 = data %>% filter(congresoR=="C2016_2021"& proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
 
-proponentes2 = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+proponentes2 = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
 
 proponentes= left_join(proponentes1, proponentes2)
 proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
 proponentes=proponentes[order(-proponentes$N_Leyes),]
 proponentes=proponentes[complete.cases(proponentes),]
 
-datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
 ```
 
 En el siguiente gráfico se muestra el estado de las leyes propuestas por grupo parlamentario.
 
-- En el caso del Grupo Parlamentario Fujimorista, este promulgó el 19% de las leyes que propuesto durante el periodo de estudio. 
-- En el caso del Frente Amplio, este promulgó el 13% de las leyes que propuso durante el periodo de estudio.
-- Finalmente, en el caso de Alianza para el Progreso, este grupo parlamentario promulgó el 15% de las leyes que propuso durante el periodo de estudio.
+- El Grupo Parlamentario Fujimorista promulgó el 19% de las leyes que propueso.
+- El Frente Amplio promulgó el 13% de las leyes que propuso.
+- Alianza para el Progreso promulgó el 15% de las leyes que propuso.
 
 ```{r include=FALSE}
 proponentes = proponentes  %>% 
@@ -1227,7 +1223,7 @@ En promedio, en el periodo legislativo 2016-2021, **una ley tardó 8 meses en se
 
 - Las leyes del Grupo Parlamentario Fujimorista se encuentran por debajo del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 8 meses en ser promulgada (33 semanas). 
 - Las leyes propuestas por el Frente Amplio se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 13 meses en ser promulgada (55 semanas). 
-- Las Leyes de Alianza para el Progreso, por su parte, también se encuentran levemente por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 8 meses en ser promulgada (37 semanas).
+- Las Leyes de Alianza para el Progreso, por su parte, también se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 8 meses en ser promulgada (37 semanas).
 
 ```{r include=FALSE}
 #Promedios: 
@@ -1248,7 +1244,7 @@ ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) +
 
 #### Análisis del contenido de Leyes Propuestas
 
-En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2016-2021. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2016-2021. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
 
 - La palabra **provincia** fue la más repetira en las leyes no promulgadas, mientras que la palabra **penal** fue la más repetida en las leyes promulgadas. 
 - En el grupo de leyes no promulgadas, destaca palabras relacionadas a: departamento, creación y distrito. 
@@ -1322,7 +1318,7 @@ ggarrange(m2,m1, ncol = 2, nrow = 1)
 
 #### Determinantes de la promulgación de leyes 
 
-En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2016-2021, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2016-2021, mediante el uso de una **regresión de Cox**. 
 
 - Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
 - Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 5%.
