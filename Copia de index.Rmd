@@ -1,0 +1,1356 @@
+<img src="https://github.com/ERMPeru/elecciones2016/raw/master/headerLogo.png" width="1000">
+
+
+## Análisis de Promulgación de Leyes en el Congreso Peruano
+
+#### Elaborado por el [Laboratorio de Políticas Públicas de la PUCP](#team)
+
+-----
+
+```{r include=FALSE}
+##Paquetes a instalar
+library(stringr)
+library(survival)
+library(ggplot2)
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
+library(ggpubr)
+library(stargazer)
+```
+
+```{r include=FALSE}
+seMean = function(x) sd(x)/sqrt(length(x))
+```
+
+```{r include=FALSE}
+#cargar data
+data=read.csv("dfall1.csv", stringsAsFactors = F)
+```
+
+```{r include=FALSE}
+data=data[-1] #Elimino partido politico, ya tenemos grupo partidario 
+names(data)
+```
+
+```{r include=FALSE}
+#periodo Congreso
+data$congresoR[data$congreso == names(table(data$congreso))[1]] = "C1995_2000"
+data$congresoR[data$congreso == names(table(data$congreso))[2]] = "C2001_2006"
+data$congresoR[data$congreso == names(table(data$congreso))[3]] = "C2006_2011"
+data$congresoR[data$congreso == names(table(data$congreso))[4]] = "C2011_2016"
+data$congresoR[data$congreso == names(table(data$congreso))[5]] = "C2011_2016"
+data$congresoR[data$congreso == names(table(data$congreso))[6]] = "C2016_2021"
+```
+
+```{r include=FALSE}
+proponenteordenado=sort(table(data$proponente), decreasing = T)
+proponenteordenado=as.data.frame(proponenteordenado)
+
+#Proponente
+data$proponenteR[data$proponente == proponenteordenado[33,1]] = NA
+data$proponenteR[data$proponente == proponenteordenado[25,1]] = "BCR"
+data$proponenteR[data$proponente == proponenteordenado[29,1]] = "BCR"
+data$proponenteR[data$proponente == proponenteordenado[7,1]] = "Colegios Profesionales"
+data$proponenteR[data$proponente == proponenteordenado[16,1]] = "Colegios Profesionales"
+data$proponenteR[data$proponente == proponenteordenado[15,1]] = "CNM"
+data$proponenteR[data$proponente == proponenteordenado[6,1]] = "Gobiernos Regionales"
+data$proponenteR[data$proponente == proponenteordenado[9,1]] = "Contraloria"
+data$proponenteR[data$proponente == proponenteordenado[11,1]] = "Poder Judicial"
+data$proponenteR[data$proponente == proponenteordenado[17,1]] = "Colegios Profesionales"
+data$proponenteR[data$proponente == proponenteordenado[1,1]] = "Congreso"
+data$proponenteR[data$proponente == proponenteordenado[23,1]] = "CNM"
+data$proponenteR[data$proponente == proponenteordenado[30,1]] = "Contraloria"
+data$proponenteR[data$proponente == proponenteordenado[20,1]] = "Poder Judicial"
+data$proponenteR[data$proponente == proponenteordenado[24,1]] = "Defensoria"
+data$proponenteR[data$proponente == proponenteordenado[34,1]] = "Defensoria"
+data$proponenteR[data$proponente == proponenteordenado[19,1]] = "Fiscalia"
+data$proponenteR[data$proponente == proponenteordenado[5,1]]= "Gobiernos Locales"
+data$proponenteR[data$proponente == proponenteordenado[36,1]] = "Gobiernos Regionales"
+data$proponenteR[data$proponente == proponenteordenado[14,1]] = "Iniciativas Ciudadanas"
+data$proponenteR[data$proponente == proponenteordenado[8,1]] = "JNE"
+data$proponenteR[data$proponente == proponenteordenado[27,1]] = "JNE"
+data$proponenteR[data$proponente == proponenteordenado[10,1]] = "Gobiernos Locales"
+data$proponenteR[data$proponente == proponenteordenado[13,1]] = "Ministerio Publico"
+data$proponenteR[data$proponente == proponenteordenado[4,1]] = "Gobiernos Locales"
+data$proponenteR[data$proponente == proponenteordenado[18,1]] = "ONPE"
+data$proponenteR[data$proponente == proponenteordenado[31,1]] = "ONPE"
+data$proponenteR[data$proponente == proponenteordenado[2,1]] = "Poder Ejecutivo"
+data$proponenteR[data$proponente == proponenteordenado[3,1]] = "Poder Ejecutivo"
+data$proponenteR[data$proponente == proponenteordenado[12,1]] = "Poder Ejecutivo"
+data$proponenteR[data$proponente == proponenteordenado[26,1]] = "Poder Judicial"
+data$proponenteR[data$proponente == proponenteordenado[28,1]] = "RENIEC"
+data$proponenteR[data$proponente == proponenteordenado[21,1]] = "RENIEC"
+data$proponenteR[data$proponente == proponenteordenado[22,1]] = "SBS"
+data$proponenteR[data$proponente == proponenteordenado[32,1]] = "TC"
+data$proponenteR[data$proponente == proponenteordenado[35,1]] = "TC"
+```
+
+```{r include=FALSE}
+#Poder Ejecutivo
+data$ProponeEjecutivo = factor(ifelse(data$proponenteR=="Poder Ejecutivo",1,0))
+```
+
+```{r include=FALSE}
+#Grupo Parlamentario 
+data$grupoParlamentarioR=data$grupoParlamentario
+
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[3]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[9]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[11]] = "Comision Especial"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[25]] = "Partido Aprista Peruano"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[26]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[27]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[29]] = "Multipartidario"
+data$grupoParlamentarioR[data$grupoParlamentario == names(table(data$grupoParlamentario))[33]] = "Multipartidario"
+```
+
+```{r include=FALSE}
+#Partido oficialista
+data$GPOficialista=factor(ifelse(data$congresoR=="C1995_2000" & 
+                                 data$grupoParlamentarioR == "Grupo Fujimorista",1,
+                          ifelse(data$congresoR=="C2001_2006" &  
+                                 data$grupoParlamentarioR == "Peru Posible",1,
+                          ifelse(data$congresoR=="C2006_2011" &  
+                                 data$grupoParlamentarioR == "Partido Aprista Peruano",1,
+                          ifelse(data$congresoR=="C2011_2016" &  
+                                 data$grupoParlamentarioR == "Grupo Parlamentario Nacionalista",1, 
+                          ifelse(data$congresoR=="C2016_2021" &  
+                                 data$grupoParlamentarioR == "Peruanos por el Kambio",1,0))))))
+```
+
+```{r include=FALSE}
+#Estado promulgado
+data$Promulgado= factor(ifelse(grepl("Publicado", data$estadoFinal),1,
+                       ifelse(grepl("Promulgado", data$estadoFinal),1,0)))
+```
+
+
+```{r include=FALSE}
+#Fecha presentaci??n:
+data$fechaPresentacion = as.POSIXct(strptime(data$fechaPresentacion, format="%d/%m/%y"))
+```
+
+```{r include=FALSE}
+#Fecha estado final:
+data$FechaPromulgado = ifelse(data$congresoR=="C1995_2000" & 
+                                 data$Promulgado == "0","26/07/00",
+                          ifelse(data$congresoR =="C2001_2006" &  
+                                 data$Promulgado == "0","26/07/06",
+                          ifelse(data$congresoR =="C2006_2011" &  
+                                 data$Promulgado == "0","26/07/11",
+                          ifelse(data$congresoR =="C2011_2016" &  
+                                 data$Promulgado == "0","26/07/16", 
+                          ifelse(data$congresoR =="C2016_2021" &  
+                                 data$Promulgado == "0","12/11/18", data$estadoFinalFecha)))))
+
+data$FechaPromulgado=as.POSIXct(strptime(data$FechaPromulgado, format="%d/%m/%y"))
+```
+
+```{r include=FALSE}
+#Tiempo publicacion
+data$TiempoP=difftime(data$FechaPromulgado,data$fechaPresentacion, units = "weeks")
+```
+
+```{r include=FALSE}
+data$sumilla=tolower(data$sumilla)
+
+#Impuestos
+data$Impuestos = factor(ifelse(grepl("impuesto", data$sumilla),1,0))
+
+#Penal
+data$Penal = factor(ifelse(grepl("penal", data$sumilla),1,0))
+
+#Sistema:
+data$Sistema = factor(ifelse(grepl("sistema", data$sumilla),1,0))
+
+#Provincia:
+data$Provincia = factor(ifelse(grepl("provincia", data$sumilla),1,0))
+```
+
+__Índice __
+
+  * [Introducción](#Intro)
+  * [Análisis periodo 1995-2000](#P1995)
+  * [Análisis periodo 2001-2006](#P2001)
+  * [Análisis periodo 2006-2011](#P2006)
+  * [Análisis periodo 2011-2016](#P2011) 
+  * [Análisis periodo 2016-2021](#P2016)
+    
+#### Introducción
+
+<a id='Intro'></a> 
+
+El presente ejercicio evalúa la promulgación de leyes de los últimos 5 periodos parlamentarios. En total, se analizaron **34 587 propuestas de ley.**  
+
+```{r include=FALSE}
+leyesCongreso = data %>% group_by(congresoR) %>%  summarise(leyes=n()) 
+```
+
+```{r fig.height = 3.5, echo=FALSE,warning=FALSE}
+ggplot(data=leyesCongreso, aes(x=congresoR, y=leyes)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Propuestas de ley por legislatura", y="Numero total", x="Legislatura", caption="Promedio de propuestas de ley por legislatura: 6 917") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = mean(leyesCongreso$leyes) ,linetype="dashed", color="red")  + geom_text(aes(label=leyes), vjust=1.6, color="white", size=3) 
+```
+
+###  Análisis periodo 1995-2000
+
+<a id='P1995'></a> 
+
+En la siguiente sección, se analizan las **5 807 leyes propuestas** durante el periodo legislativo 1995-2000. 
+
+#### Proponentes
+
+Una ley puede ser propuesta por distintas instituciones o actores de la sociedad civil. En el periodo legislativo 1995-2000, se encontraron **14 proponentes distintos.** A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas en el periodo de estudio. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C1995_2000") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% group_by(proponenteR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
+```
+
+En el periodo legislativo 1995-2000, **el 26% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgadas en el periodo de estudio, en función del tipo de proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 79% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- El Congreso promulgó la cuarta parte de las leyes que propuso. El 22% de las leyes propuestas por el Congreso fueron promulgadas. 
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 8% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:14)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por proponente (1995-2000)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 1995-2000, **una ley tardó seis meses en ser promulgada (26 semanas)**. El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Poder Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 2 meses en ser promulgada (9 semanas). 
+- Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 7 meses en ser promulgada (31 semanas). 
+- Las Leyes del Gobierno Local se encuentran por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 9 meses en ser promulgada (38 semanas). 
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% 
+  group_by(proponenteR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+
+```{r fig.height = 4, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (1995-2000)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 26.2 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 26.17168 ,linetype="dashed", color="red")
+
+```
+
+#### Grupos parlamentarios 
+
+Las leyes del Congreso son propuestas por distintos grupos parlamentarios. A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. Importa resaltar que **NO se cuenta con información del grupo parlamentario de 5 752 leyes**. De las leyes que cuentan con información, el Grupo Fujimorista registra la mayor cantidad de leyes propuestas. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C1995_2000" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+```
+
+En tanto no se cuenta con información para la mayoría de leyes, no se continuará con el análisis de grupos parlamentarios. 
+
+#### Análisis del contenido de Leyes Propuestas
+
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 1995-2000. Ello con el objetivo de encontrar patrones en los temas que fueron abordados por las leyes propuestas y promulgadas. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes propuestas en el periodo de estudio. 
+
+- La palabra **impuesto** fue la más repetida, tanto en leyes promulgadas como no promulgadas. 
+- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: derechos, servicios y regiones. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: ventas, promoción y empresas. 
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C1995_2000" & Promulgado=="1") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d=d[c(1:20),]
+d=d[order(-d$freq),]
+d$orden=c(1:20)
+```
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C1995_2000" & Promulgado=="0") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d2 <- data.frame(word = names(v),freq=v)
+d2=d2[c(1:20),]
+d2=d2[order(-d2$freq),]
+d2$orden=c(1:20)
+```
+
+```{r fig.height = 4.5, echo=FALSE,warning=FALSE}
+m1= ggplot(d, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip()
+
+m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
+
+ggarrange(m2,m1, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 1995-2000, mediante el uso de una **regresión de Cox**. La regresión de Cox permite detectar relaciones entre el *riesgo* de que suceda un determinado suceso (en este caso, de que una ley sea promulgada) y distintas variables explicativas. 
+
+- Que una ley sea propuesta por el grupo parlamentario oficialista, incrementa la probabilidad de que la ley sea promulgada en 6.1%.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 8.9%.
+- Que una ley se refiera a impuestos, incrementa la probabilidad de que la ley sea promulgada en 2.0%. 
+
+```{r include=FALSE}
+ModeloCongreso1=data[data$congresoR=='C1995_2000',]
+```
+
+```{r include=FALSE}
+library(survival)
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Impuestos")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Impuestos,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
+```
+
+<a id='P2001'></a> 
+
+###  Análisis periodo 2001-2006
+
+En la siguiente sección, se analizan las **14 839 leyes propuestas** durante el periodo legislativo 2001-2006.
+
+#### Proponentes
+
+En el periodo legislativo 2001-2006, se encontraron 15 proponentes distintos. A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2001_2006") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1") %>% group_by(proponenteR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+```
+
+En el periodo legislativo 2001-2006, **el 33% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 78% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- En el caso del Congreso, este promulgó el 31% de las leyes que propuso durante el periodo de estudio.
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 23% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. Sin embargo, esta cifra aumenta con respecto al periodo legislativo anterior.
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:15)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por proponente (2001-2006)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2001-2006, **una ley tardó 11 meses en ser promulgada** (49 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 5 meses en ser promulgada (20 semanas). 
+- Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 12 meses en ser promulgada (53 semanas). 
+- Las Leyes del Gobierno Local se encuentran por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 10 meses en ser promulgada (43 semanas). 
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1") %>% 
+  group_by(proponenteR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+
+```{r fig.height = 4, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (2001-2006)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 49 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 48.96217 ,linetype="dashed", color="red")
+
+```
+
+#### Grupos parlamentarios 
+
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. Perú Posible registra la mayor cantidad de leyes propuestas, seguido por Unidad Nacional y el Partido Aprista Peruano.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2001_2006" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
+```
+
+En el siguiente gráfico se muestra el estado de las leyes propuestas, en función del grupo parlamentario.
+
+- Peru Posible muestra el mayor porcentaje de leyes promulgadas. El 32% de las leyes propuestas por este grupo parlamentario fueron promulgadas. 
+- Unidad Nacional promulgó el 30% de las leyes que propuso.
+- El Partido Aprista Peruano, por su parte, también promulgó el 30% de las leyes que propuso.
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:11)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por grupo parlamentario (2001-2006)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2001-2006, **una ley tardó 12 meses en ser promulgada** (53 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del grupo parlamentario. 
+
+- Las leyes de Perú Posible se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 12 meses en ser promulgada (55 semanas). 
+- Las leyes de Unidad Nacional también se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 13 meses en ser promulgada (58 semanas). 
+- Las Leyes del Partido Aprista Peruano se encuentran, al igual que los dos casos anteriores, levemente por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 12 meses en ser promulgada (54 semanas). 
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1" & proponenteR == "Congreso") %>% 
+  group_by(grupoParlamentarioR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+```{r fig.height = 6, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (2001-2006)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 53 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 53.42184 ,linetype="dashed", color="red")
+
+```
+
+#### Análisis del contenido de Leyes Propuestas
+
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2001-2006.  Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+
+- La palabra **penal** fue la más repetida, tanto en leyes promulgadas como no promulgadas. 
+- En el grupo de leyes no promulgadas, destacan palabras relacionadas a: constitución, civil y política. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: congreso, creación e impuestos.
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2001_2006" & Promulgado=="1") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d=d[c(1:20),]
+d=d[order(-d$freq),]
+d$orden=c(1:20)
+```
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2001_2006" & Promulgado=="0") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d2 <- data.frame(word = names(v),freq=v)
+d2=d2[c(1:20),]
+d2=d2[order(-d2$freq),]
+d2$orden=c(1:20)
+```
+
+```{r fig.height = 4.5, echo=FALSE,warning=FALSE}
+m1= ggplot(d, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip()
+
+m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 800, by = 100))
+
+ggarrange(m2,m1, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2001-2006, mediante el uso de una **regresión de Cox**. La regresión de Cox.
+
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 5.7%.
+- Que una ley se refiera a penal no incrementa la probabilidad de que una ley sea promulgada.
+- Que una ley se refiera a impuestos no incrementa la probabilidad de que una ley sea promulgada.
+
+```{r include=FALSE}
+ModeloCongreso1=data[data$congresoR=='C2001_2006',]
+```
+
+```{r include=FALSE}
+library(survival)
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal", "Impuestos")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal + Impuestos,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
+```
+
+
+<a id='P2006'></a> 
+
+###  Análisis periodo 2006-2011
+
+En la siguiente sección, se analizan las **4 908 leyes propuestas** durante el periodo legislativo 2006-2011.
+
+#### Proponentes
+
+En el periodo legislativo 2006-2011, se encontraron 16 proponentes distintos. A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2006_2011") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2006_2011" & Promulgado=="1") %>% group_by(proponenteR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
+```
+
+En el periodo legislativo 2006-2011, **el 28% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgadas en el periodo de estudio, en función del proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 57% de las leyes propuestas por el Ejecutivo fueron promulgadas. Ello muestra una dismunición en comparación con periodos legislativos anteriores.
+- El Congreso se encuentra entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 22% de las leyes propuestas por el Congreso fueron promulgadas.
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 23% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:16)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por proponente (2006-2011)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2006-2011, **una ley tardó 11 meses en ser promulgada** (47 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 5 meses en ser promulgada (23 semanas). 
+- Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 14 meses en ser promulgada (60 semanas). 
+- Las Leyes del Gobierno Local se encuentran cerca del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 11 meses en ser promulgada (47 semanas). 
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2006_2011" & Promulgado=="1") %>% 
+  group_by(proponenteR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+
+```{r fig.height = 4, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (2006-2011)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 47 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 46.74928 ,linetype="dashed", color="red")
+
+```
+
+#### Grupos parlamentarios 
+
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. El Grupo Parlamentario Nacionalista registra la mayor cantidad de leyes propuestas, seguido por el Partido Aprista Peruano y Unidad Nacional. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2006_2011" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2006_2011" & Promulgado=="1" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
+```
+
+En el siguiente gráfico se muestra el estado de las leyes propuestas, por grupo parlamentario.
+
+- El Grupo Parlamentario Nacionalista, promulgó el 19% de las leyes que propuso.
+- El Partido Aprista Peruano, promulgó el 26% de las leyes que propuso.
+- Unidad Nacional también promulgó el 26% de las leyes que propuso.
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:15)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por grupo parlamentario (2006-2011)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2006-2011, **una ley tardó 14 meses en ser promulgada** (60 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del grupo parlamentario. 
+
+- Las leyes del Grupo Parlamentario Nacionalista se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 16 meses en ser promulgada (72 semanas). 
+- Las leyes propuestas por el Partido Aprista Peruano también se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 15 meses en ser promulgada (64 semanas). 
+- Las Leyes de Undidad Nacional, por su parte, también se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 14 meses en ser promulgada (63 semanas).
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2006_2011" & Promulgado=="1" & proponenteR == "Congreso") %>% 
+  group_by(grupoParlamentarioR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+```{r fig.height = 6, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (2006-2011)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 60 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 59.86643 ,linetype="dashed", color="red")
+
+```
+
+#### Análisis del contenido de Leyes Propuestas
+
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2006-2011. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+
+- La palabra **penal** fue una de las más repetidas, tanto en leyes promulgadas como no promulgadas. 
+- En el grupo de leyes no promulgadas, destacan palabras relacionadas a: constitución, servicios y salud. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: sector, provincia y fiscal.
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2006_2011" & Promulgado=="1") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer", "autorizar", "crear"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d=d[c(1:20),]
+d=d[order(-d$freq),]
+d$orden=c(1:20)
+```
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2006_2011" & Promulgado=="0") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer", "autorizar", "crear"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d2 <- data.frame(word = names(v),freq=v)
+d2=d2[c(1:20),]
+d2=d2[order(-d2$freq),]
+d2$orden=c(1:20)
+```
+
+```{r fig.height = 4.5, echo=FALSE,warning=FALSE}
+m1= ggplot(d, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip()
+
+m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
+
+ggarrange(m2,m1, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2006-2011, mediante el uso de una **regresión de Cox**.
+
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 4.3%.
+- Que una ley se refiera a penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+
+
+```{r include=FALSE}
+ModeloCongreso1=data[data$congresoR=='C2006_2011',]
+```
+
+```{r include=FALSE}
+library(survival)
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
+```
+
+<a id='P2011'></a> 
+
+###  Análisis periodo 2011-2016
+
+En la siguiente sección, se analizan las **5 424 leyes propuestas** durante el periodo legislativo 2011-2016.
+
+#### Proponentes
+
+En el periodo legislativo 2011-2016, se encontraron 16 proponentes distintos. A continuación, se muestra el número de leyes propuestas por tipo de proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2011_2016") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1") %>% group_by(proponenteR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+```
+
+En el periodo legislativo 2011-2016, **el 28% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 77% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- El Congreso se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. El 22% de las leyes que propuso el Ejecutivo fueron promulgadas.
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 17% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:17)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por proponente (2011-2016)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2011-2016, **una ley tardó 11 meses en ser promulgada** (46 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 5 meses en ser promulgada (21 semanas). 
+- Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 13 meses en ser promulgada (56 semanas). 
+- Las Leyes del Gobierno Local se encuentran por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 16 meses en ser promulgada (68 semanas). 
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1") %>% 
+  group_by(proponenteR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+
+```{r fig.height = 4, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (2011-2016)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 46 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 45.99001 ,linetype="dashed", color="red")
+
+```
+
+#### Grupos parlamentarios 
+
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. El Grupo Parlamentario Nacionalista registra la mayor cantidad de leyes propuestas, seguido por el Grupo Fujimorista y Solidaridad Nacional. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2011_2016" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+```
+
+En el siguiente gráfico se muestra el estado de las leyes propuestas por grupo parlamentario.
+
+- El Grupo Parlamentario Nacionalista promulgó el 22% de las leyes que propuso.
+- En Grupo Fujimorista promulgó el 24% de las leyes que propuso.
+- Solidaridad Nacional promulgó el 22% de las leyes que propuso.
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:15)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por grupo parlamentario (2011-2016)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2011-2016, **una ley tardó 13 meses en ser promulgada** (56 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del grupo parlamentario. 
+
+- Las leyes del Grupo Parlamentario Nacionalista se encuentran por debajo del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 13 meses en ser promulgada (55 semanas). 
+- Las leyes propuestas por el Grupo Fujimorista también se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 14 meses en ser promulgada (61 semanas). 
+- Las Leyes de Solidaridad Nacional, por su parte, también se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 14 meses en ser promulgada (62 semanas).
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1" & proponenteR == "Congreso") %>% 
+  group_by(grupoParlamentarioR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+```{r fig.height = 6, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (2011-2016)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 56 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 55.59501 ,linetype="dashed", color="red")
+
+```
+
+#### Análisis del contenido de Leyes Propuestas
+
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2011-2016. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+
+- La palabra **penal** fue una de las más repetidas, tanto en leyes promulgadas como no promulgadas. 
+- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: regiones, desarrollo y salud.
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: regiones, territorio y ejecución.
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2011_2016" & Promulgado=="1") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer", "autorizar", "crear", "interes", "necesidad"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d=d[c(1:20),]
+d=d[order(-d$freq),]
+d$orden=c(1:20)
+```
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2011_2016" & Promulgado=="0") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer", "autorizar", "crear", "interes", "necesidad"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d2 <- data.frame(word = names(v),freq=v)
+d2=d2[c(1:20),]
+d2=d2[order(-d2$freq),]
+d2$orden=c(1:20)
+```
+
+```{r fig.height = 4.5, echo=FALSE,warning=FALSE}
+m1= ggplot(d, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip()
+
+m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
+
+ggarrange(m2,m1, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2011-2016, mediante el uso de una **regresión de Cox**.
+
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 7.7%.
+- Que una ley se refiera a penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+
+```{r include=FALSE}
+ModeloCongreso1=data[data$congresoR=='C2011_2016',]
+```
+
+```{r include=FALSE}
+library(survival)
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
+```
+
+<a id='P2016'></a> 
+
+###  Análisis periodo 2016-2021
+
+En la siguiente sección, se analizan las **3 607 leyes propuestas** durante el periodo legislativo 2016-2021.
+
+#### Proponentes
+
+En el periodo legislativo 2016-2021, se encontraron 13 proponentes distintos. A continuación, se muestra el número de leyes propuestas por proponente. De acuerdo a ello, después del Congreso, el Poder Ejecutivo y los Gobiernos Locales registraron el mayor número de leyes propuestas y promulgadas en el periodo de estudio.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2016_2021") %>% group_by(proponenteR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1") %>% group_by(proponenteR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes, options=list(pageLength=5, scrollX="500px"))
+```
+
+Hasta el momento, **el 19% de leyes propuestas fueron promulgadas.** El siguiente gráfico muestra el porcentaje de leyes promulgada en el periodo de estudio, en función del proponente. 
+
+- El Poder Ejecutivo muestra el mayor porcentaje de leyes promulgadas. El 48% de las leyes propuestas por el Ejecutivo fueron promulgadas. 
+- En el caso del Congreso, este promulgó el 16% de las leyes que propuso durante el periodo de estudio.
+- Los Gobiernos Locales se encuentran entre los proponentes con menor porcentaje de leyes promulgadas. Solo el 11% de las leyes propuestas por los Gobiernos Locales fueron promulgadas. 
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:14)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(proponenteR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por proponente (2016-2021)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2016-2021, **una ley tardó 7 meses en ser promulgada** (32 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del tipo de proponente. 
+
+- Las leyes del Ejecutivo se encuentran por debajo del promedio. Una ley propuesta por el Ejecutivo tarda, en promedio, 5 meses en ser promulgada (19 semanas). 
+- Las leyes del Congreso se encuentran por encima del promedio. Una ley propuesta por el Congreso tarda, en promedio, 8 meses en ser promulgada (35 semanas). 
+- Las Leyes del Gobierno Local se encuentran por encima del promedio. Una ley propuesta por los Gobiernos Locales tarda, en promedio, 12 meses en ser promulgada (54 semanas). 
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1") %>% 
+  group_by(proponenteR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+
+```{r fig.height = 4, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=proponenteR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por proponente (2016-2021)", y="Tiempo promedio (semanas)", x="Proponente", caption="Tiempo promedio: 32 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 31.82399 ,linetype="dashed", color="red")
+
+```
+
+#### Grupos parlamentarios 
+
+A continuación, se muestra el número de leyes propuestas por el Congreso, según grupo parlamentario. El Grupo Parlamentario Fujimorista registra la mayor cantidad de leyes propuestas, seguido por el Frente Amplio y Alianza para el Progreso. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+proponentes1 = data %>% filter(congresoR=="C2016_2021"& proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes=n())
+
+proponentes2 = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1" & proponenteR=="Congreso") %>% group_by(grupoParlamentarioR)  %>% summarise(N_Leyes_Promulgadas=n())
+
+proponentes= left_join(proponentes1, proponentes2)
+proponentes$N_Leyes_Promulgadas[is.na(proponentes$N_Leyes_Promulgadas)]=0
+proponentes=proponentes[order(-proponentes$N_Leyes),]
+proponentes=proponentes[complete.cases(proponentes),]
+
+datatable(proponentes[c(1,2)], options=list(pageLength=5, scrollX="500px"))
+```
+
+En el siguiente gráfico se muestra el estado de las leyes propuestas por grupo parlamentario.
+
+- El Grupo Parlamentario Fujimorista promulgó el 19% de las leyes que propueso.
+- El Frente Amplio promulgó el 13% de las leyes que propuso.
+- Alianza para el Progreso promulgó el 15% de las leyes que propuso.
+
+```{r include=FALSE}
+proponentes = proponentes  %>% 
+         mutate(N_Leyes_NoPromulgadas = N_Leyes - N_Leyes_Promulgadas,
+                Promulgadas = (N_Leyes_Promulgadas/N_Leyes)*100,
+                NoPromulgadas = (N_Leyes_NoPromulgadas/N_Leyes)*100)
+
+proponentes$orden=c(1:10)
+
+proponentes = gather(proponentes, Estado, value=Porcentaje, Promulgadas, NoPromulgadas)
+
+proponentes$Porcentaje[proponentes$Porcentaje==0] = NA
+```
+
+```{r fig.height = 4, echo=FALSE, fig.width=8.5, warning=FALSE}
+ggplot(proponentes, aes(x = reorder(grupoParlamentarioR,-orden), y = Porcentaje, fill = Estado)) + 
+  geom_bar(stat = "identity") + coord_flip() +
+  geom_text(aes(label=paste0(round(Porcentaje,1), "%")), position=position_stack(vjust=0.5), vjust = .5, size = 3, col="white") + labs(title="Estado de leyes propuestas por grupo parlamentario (2016-2021)", y="Porcentaje (%)", x="Tipo de proponente") + theme(plot.title = element_text(hjust = 0.5)) +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black"))
+```
+
+En promedio, en el periodo legislativo 2016-2021, **una ley tardó 8 meses en ser promulgada** (35 semanas). El siguiente gráfico muestra el tiempo promedio para que una ley sea promulgada, en función del grupo parlamentario. 
+
+- Las leyes del Grupo Parlamentario Fujimorista se encuentran por debajo del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 8 meses en ser promulgada (33 semanas). 
+- Las leyes propuestas por el Frente Amplio se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 13 meses en ser promulgada (55 semanas). 
+- Las Leyes de Alianza para el Progreso, por su parte, también se encuentran por encima del promedio. Una ley propuesta por este grupo parlamentario tarda, en promedio, 8 meses en ser promulgada (37 semanas).
+
+```{r include=FALSE}
+#Promedios: 
+meanTiempo = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1" & proponenteR == "Congreso") %>% 
+  group_by(grupoParlamentarioR) %>% 
+  summarise(Leyes = n(),
+            Tiempo = mean(as.numeric(TiempoP)), 
+            seTiempo = seMean(as.numeric(TiempoP)))
+meanTiempo=meanTiempo[order(-meanTiempo$Leyes),]
+```
+
+```{r fig.height = 6, echo=FALSE,warning=FALSE}
+ggplot(meanTiempo, aes(x=grupoParlamentarioR, y=Tiempo)) + 
+    geom_errorbar(aes(ymin=Tiempo-seTiempo, ymax=Tiempo+seTiempo), width=.1) +
+    geom_point()+ labs(title="Tiempo promedio para promulgar una ley por Grupo Parlamentario (2016-2021)", y="Tiempo promedio (semanas)", x="Grupo Parlamentario", caption="Tiempo promedio: 35 semanas") + theme(plot.title = element_text(hjust = 0.5)) + theme(panel.background=element_rect(fill = "white", colour = "black")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))+ geom_hline(yintercept = 34.64286 ,linetype="dashed", color="red")
+
+```
+
+#### Análisis del contenido de Leyes Propuestas
+
+En la siguiente sección, se analiza el contenido de las sumillas de las leyes propuestas en el perido legislativo 2016-2021. Los siguientes gráficos muestran las palabras que fueron mencionadas con mayor frecuencia en las sumillas de las leyes analizadas. 
+
+- La palabra **provincia** fue la más repetira en las leyes no promulgadas, mientras que la palabra **penal** fue la más repetida en las leyes promulgadas. 
+- En el grupo de leyes no promulgadas, destaca palabras relacionadas a: departamento, creación y distrito. 
+- En el grupo de leyes promulgadas, destacan palabras relacionadas a: constitución, provincia y departamento.
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2016_2021" & Promulgado=="1") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer", "autorizar", "crear", "interes", "necesidad"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d=d[c(1:20),]
+d=d[order(-d$freq),]
+d$orden=c(1:20)
+```
+
+```{r include=FALSE}
+dataText = data %>% filter(congresoR=="C2016_2021" & Promulgado=="0") %>% select(sumilla)
+modi<-Corpus(VectorSource(dataText$sumilla))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi,stripWhitespace)
+modi_data<-tm_map(modi_data,tolower)
+modi_data<-tm_map(modi_data,removeNumbers)
+modi_data<-tm_map(modi_data,removePunctuation)
+modi_data<-tm_map(modi_data,removeWords, stopwords("spanish"))
+```
+
+```{r include=FALSE}
+modi_data<-tm_map(modi_data, removeWords, c("ley", "articulo", "decreto", "legislativo", "modificado", "modifica", "proyecto", "general", "modificando", "codigo", "articulos", "estableciendo", "republica", "referente", "inciso", "peru", "comision", "establece", "organica", "fin", "anos", "plazo", "ano", "declarando", "plazo", "diciembre", "presente", "parrafo", "texto", "creando", "derogando", "cada", "dos", "seran", "mas", "cargo", "refiere", "declara", "autoriza", "partir", "referido", "forma", "deroga", "actos", "dia", "supremo", "final", "san", "dicha", "caso", "nacional", "ser", "asi", "mismo", "titulo", "toda", "todo", "prorroga", "publico", "publica", "acuerdo", "poder", "vigencia", "dias", "disposicion", "propone", "modificar", "num", "propuesta", "incorporar", "declarar", "establecer", "autorizar", "crear", "interes", "necesidad"))
+```
+
+```{r include=FALSE}
+dtm <- TermDocumentMatrix(modi_data)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d2 <- data.frame(word = names(v),freq=v)
+d2=d2[c(1:20),]
+d2=d2[order(-d2$freq),]
+d2$orden=c(1:20)
+```
+
+```{r fig.height = 4.5, echo=FALSE,warning=FALSE}
+m1= ggplot(d, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip()
+
+m2= ggplot(d2, aes(x = reorder(word,-orden), y = freq)) +
+  geom_bar(stat="identity", fill="darkgrey") + labs(title="Leyes No Promulgadas", y="Numero de menciones", x="") +
+    	    theme(panel.background=element_rect(fill = "white", colour = "black")) + coord_flip() + scale_y_continuous(breaks = seq(0, 250, by = 50))
+
+ggarrange(m2,m1, ncol = 2, nrow = 1)
+```
+
+#### Determinantes de la promulgación de leyes 
+
+En la siguiente sección, se analizan los determinantes de la promulgación de leyes en el periodo legislativo 2016-2021, mediante el uso de una **regresión de Cox**. 
+
+- Que una ley sea propuesta por el grupo parlamentario oficialista no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+- Que una ley sea propuesta por el Ejecutivo, incrementa la probabilidad de que la ley sea promulgada en 5%.
+- Que una ley se refiera a provincia o penal no incrementa la probabilidad de que una ley sea promulgada en este periodo de estudio.
+
+
+```{r include=FALSE}
+ModeloCongreso1=data[data$congresoR=='C2016_2021',]
+```
+
+```{r include=FALSE}
+library(survival)
+ModeloCongreso1$PromulgadaSurv=with(ModeloCongreso1,Surv(TiempoP, as.numeric(Promulgado)))
+```
+
+```{r, echo=FALSE}
+etiquetas=c("Grupo Oficialista", "Propone Ejecutivo", "Penal")
+modelo1 <- coxph(PromulgadaSurv ~ GPOficialista + ProponeEjecutivo + Penal,data=ModeloCongreso1)
+stargazer(modelo1, type = "text", 
+          apply.coef = exp,
+          apply.se   = exp,covariate.labels=etiquetas,note="Nota: se muestran los coeficientes exp.")
+```
+
+------
+
+<a id='team'></a>
+
+**El equipo del LabPUCP está conformado por:**
+
+- Director: Dr. José Manuel Magallanes
+
+- Investigadora Senior: Lic. María Gracia Becerra
+
+- Investigador Junior: Alexander Benites
